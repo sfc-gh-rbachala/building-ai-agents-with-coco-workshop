@@ -28,10 +28,10 @@ In Snowsight, open a new SQL Worksheet and run this block once:
 USE ROLE ACCOUNTADMIN;
 CREATE DATABASE IF NOT EXISTS GITTREND_DB;
 CREATE SCHEMA IF NOT EXISTS GITTREND_DB.PUBLIC;
-CREATE WAREHOUSE IF NOT EXISTS DASH_XS_WH WAREHOUSE_SIZE = XSMALL AUTO_SUSPEND = 60;
+CREATE WAREHOUSE IF NOT EXISTS WORKSHOP_WH WAREHOUSE_SIZE = XSMALL AUTO_SUSPEND = 60;
 USE DATABASE GITTREND_DB;
 USE SCHEMA GITTREND_DB.PUBLIC;
-USE WAREHOUSE DASH_XS_WH;
+USE WAREHOUSE WORKSHOP_WH;
 -- Enable Cortex AI cross-region (required for CORTEX.COMPLETE)
 ALTER ACCOUNT SET CORTEX_ENABLED_CROSS_REGION = 'ANY_REGION';
 ```
@@ -193,7 +193,7 @@ so users can search semantically — for example,
 "find repos related to autonomous agents" or
 "what projects are working on RAG pipelines".
 
-Use DASH_XS_WH as the warehouse.
+Use WORKSHOP_WH as the warehouse.
 ```
 
 **What CoCo generates:**
@@ -202,7 +202,7 @@ Use DASH_XS_WH as the warehouse.
 CREATE OR REPLACE CORTEX SEARCH SERVICE GITHUB_REPO_SEARCH
   ON description
   ATTRIBUTES repo_name, stars_gained
-  WAREHOUSE = DASH_XS_WH
+  WAREHOUSE = WORKSHOP_WH
   TARGET LAG = '1 hour'
 AS (
   SELECT
@@ -333,12 +333,13 @@ Replace GH Archive with your product telemetry, support tickets,
 sales data, or internal docs.
 
 **Resources:**
-- CoCo quickstart: `docs.snowflake.com/coco`
-- Cortex Agents guide: `snowflake.com/en/developers/guides/getting-started-with-cortex-agents`
-- End-to-end CoCo app: `snowflake.com/en/developers/guides/sfguide-build-end-to-end-ai-app-on-snowflake`
-- Dash Desai's guides: `github.com/iamontheinet`
-
-**Free trial:** `snowflake.com/try`
+- [Free Snowflake trial](https://snowflake.com/try)
+- [CoCo documentation](https://docs.snowflake.com/en/user-guide/snowflake-cortex/cortex-code)
+- [Getting Started with Cortex Agents](https://www.snowflake.com/en/developers/guides/getting-started-with-cortex-agents/)
+- [Build an End-to-End App with CoCo](https://www.snowflake.com/en/developers/guides/sfguide-build-end-to-end-ai-app-on-snowflake/)
+- [Getting Started with Snowflake CoWork](https://www.snowflake.com/en/developers/guides/getting-started-with-snowflake-cowork/)
+- [Getting Started with the Snowflake MCP Server](https://www.snowflake.com/en/developers/guides/getting-started-with-snowflake-mcp-server/)
+- [Getting Started with Snowflake Cortex AI](https://quickstarts.snowflake.com/guide/getting-started-with-snowflake-cortex-ai/)
 
 ---
 
