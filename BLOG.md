@@ -145,6 +145,8 @@ Earlier this year, Dario Amodei — CEO of Anthropic, whose Claude models power 
 
 That's not a sales pitch. That's the person who built the model telling you what he's observing among the best engineers in the industry. What we did in the workshop tonight is exactly that — 60+ engineers handing their SQL to an AI, directing it rather than writing it, and shipping a working agent in 60 minutes.
 
+Anthropic's own research puts it more precisely: *"Claude is already smart enough — the bottleneck is context, not intelligence."* That's the insight that shapes everything about how CoCo works. The model isn't the constraint. What you give it to work with — your schemas, your governance, your live data — that's the constraint. And that's exactly what CoCo solves.
+
 The traditional path to building a data-backed AI agent looks like this: understand the schema, write the data prep SQL, write the search service DDL, write the agent definition, debug the joins, tune the prompts, iterate. That's a multi-day project for an experienced data engineer.
 
 With CoCo, it's a directed conversation. You describe what you want. CoCo writes the SQL, explains what it did, and executes. You verify and move on.

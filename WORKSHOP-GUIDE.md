@@ -327,6 +327,22 @@ CoCo wrote every SQL statement. You directed it.
 
 ## Take It Further
 
+**Level up with AGENTS.md:**
+Create a file called `AGENTS.md` at the root of any project folder. Put your Snowflake account, role, warehouse, schema, and what must not change. CoCo auto-loads it at the start of every session — it becomes your persistent context. Under 200 lines keeps compliance near 100%. 30 minutes of setup improves every future session.
+
+```
+# AGENTS.md
+Account: myorg-myaccount
+Role: DATA_ENGINEER
+Warehouse: WORKSHOP_WH
+Database: GITTREND_DB
+Schema: GITTREND_DB.PUBLIC
+
+Do NOT modify: production tables, RBAC roles, cost-sensitive resources.
+Always use WAREHOUSE = WORKSHOP_WH in DDL.
+Always use fully qualified object names (DB.SCHEMA.OBJECT).
+```
+
 **Adapt this to your own data:**
 The same 5-step pattern works on any dataset in your org.
 Replace GH Archive with your product telemetry, support tickets,
