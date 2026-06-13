@@ -139,6 +139,12 @@ That doesn't happen with a generic chatbot. It happens when you give an agent re
 
 ## Why CoCo Changes the Equation
 
+Earlier this year, Dario Amodei — CEO of Anthropic, whose Claude models power CoCo — wrote this:
+
+> *"Some of the strongest engineers I've ever met are now handing over almost all their coding to AI."*
+
+That's not a sales pitch. That's the person who built the model telling you what he's observing among the best engineers in the industry. What we did in the workshop tonight is exactly that — 60+ engineers handing their SQL to an AI, directing it rather than writing it, and shipping a working agent in 60 minutes.
+
 The traditional path to building a data-backed AI agent looks like this: understand the schema, write the data prep SQL, write the search service DDL, write the agent definition, debug the joins, tune the prompts, iterate. That's a multi-day project for an experienced data engineer.
 
 With CoCo, it's a directed conversation. You describe what you want. CoCo writes the SQL, explains what it did, and executes. You verify and move on.
