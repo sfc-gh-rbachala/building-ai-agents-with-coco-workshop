@@ -10,7 +10,7 @@ Workshop materials for *Build an AI Agent in 60 Minutes with Snowflake CoCo*, pr
 
 ## What You'll Build
 
-**GitTrend** — a working Cortex AI agent that answers natural language questions about trending GitHub repositories, powered by 4 billion+ real GitHub events from the GH Archive.
+**GitTrend** — a working Cortex AI agent that answers natural language questions about trending GitHub repositories, powered by 107M+ real GitHub events (30 days of public GitHub activity).
 
 ![GitTrend answering questions in CoWork](gittrend-showcase.gif)
 
@@ -32,16 +32,8 @@ Use the event-specific link below — it enables all AI features for the worksho
 **[Sign up here](https://signup.snowflake.com/?t=521d04bacb9556ae0a2fcb837fbf1db2e78f9e0581a062acb9c7e4100ac1eba6)**
 Choose **AWS US East** when prompted. Select **AI Data Cloud** as your use case.
 
-### 2. Mount the GH Archive dataset
-In Snowsight (Snowflake's UI):
-1. Left nav → **Data Products → Marketplace**
-2. Search: `GH Archive` → **Get**
-3. Database name: `GH_ARCHIVE` (keep default) → **Get**
-
-Free. No import. One click.
-
-### 3. Run the one-time setup SQL
-Open a new SQL Worksheet in Snowsight and run:
+### 2. Load the GitHub Archive dataset
+Open a new SQL Worksheet in Snowsight and run the full setup block below. It creates your database and loads ~107M real GitHub events from a public S3 bucket. **Takes ~7 minutes — start this now.**
 
 ```sql
 USE ROLE ACCOUNTADMIN;
@@ -52,9 +44,31 @@ USE DATABASE GITTREND_DB;
 USE SCHEMA GITTREND_DB.PUBLIC;
 USE WAREHOUSE WORKSHOP_WH;
 ALTER ACCOUNT SET CORTEX_ENABLED_CROSS_REGION = 'ANY_REGION';
+
+CREATE OR REPLACE FILE FORMAT GITHUB_JSON_FORMAT
+  TYPE = 'JSON' STRIP_OUTER_ARRAY = TRUE COMPRESSION = 'GZIP';
+
+CREATE OR REPLACE STAGE GITHUB_STAGE
+  URL = 's3://sfquickstarts/vhol_building_ai_agents_with_coco/'
+  FILE_FORMAT = GITHUB_JSON_FORMAT;
+
+CREATE OR REPLACE TABLE GITTREND_DB.PUBLIC.GITHUB_EVENTS (
+    RAW VARIANT, EVENT_ID STRING, EVENT_TYPE STRING,
+    CREATED_AT TIMESTAMP, ACTOR_LOGIN STRING, ACTOR_ID NUMBER,
+    REPO_NAME STRING, REPO_ID NUMBER, ORG_LOGIN STRING, IS_PUBLIC BOOLEAN
+);
+
+COPY INTO GITTREND_DB.PUBLIC.GITHUB_EVENTS
+FROM (SELECT $1,$1:id::STRING,$1:type::STRING,$1:created_at::TIMESTAMP,
+    $1:actor:login::STRING,$1:actor:id::NUMBER,$1:repo:name::STRING,
+    $1:repo:id::NUMBER,$1:org:login::STRING,$1:public::BOOLEAN
+    FROM @GITHUB_STAGE)
+PATTERN = '.*json.gz';
+
+SELECT COUNT(*) FROM GITTREND_DB.PUBLIC.GITHUB_EVENTS; -- expect ~107M
 ```
 
-### 4. Verify CoCo is available
+### 3. Verify CoCo is available
 In Snowsight, look for **CoCo** in the left nav.
 If you don't see it: **Admin → Snowsight Features → Enable CoCo**.
 
@@ -74,7 +88,7 @@ If you don't see it: **Admin → Snowsight Features → Enable CoCo**.
 ![Workshop teaser — intro to payoff](workshop-teaser.gif)
 
 ```
-1. Mount the data        →  GH Archive from Marketplace (free, one click)
+1. Load the data         →  107M GitHub events via COPY INTO from public S3
 2. CoCo explores         →  Describe the schema, find the right columns
 3. Build the query       →  Trending AI repos by star activity, last 30 days
 4. Add CORTEX.COMPLETE   →  Turn SQL results into natural language

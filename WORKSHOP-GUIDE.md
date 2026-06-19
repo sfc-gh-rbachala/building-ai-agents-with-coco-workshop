@@ -222,7 +222,7 @@ SELECT SNOWFLAKE.CORTEX.COMPLETE(
 
 ```
 Create a Cortex Search Service called GITHUB_REPO_SEARCH
-using the GH_ARCHIVE data.
+using the GITHUB_EVENTS data we loaded.
 
 It should index the repo descriptions and names
 so users can search semantically — for example,
