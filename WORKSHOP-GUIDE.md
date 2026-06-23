@@ -241,7 +241,7 @@ CREATE OR REPLACE CORTEX SEARCH SERVICE GITHUB_REPO_SEARCH
   ON description
   ATTRIBUTES repo_name, stars_gained
   WAREHOUSE = WORKSHOP_WH
-  TARGET LAG = '1 hour'
+  TARGET_LAG = '1 hour'
 AS (
   SELECT
       REPO_NAME                                              AS repo_name,
@@ -287,23 +287,35 @@ Create it in the current database and schema.
 **What CoCo generates:**
 
 ```sql
-CREATE OR REPLACE CORTEX AGENT GITTREND_DB.PUBLIC.GITTREND
-    TOOLS = (
-        CORTEX_SEARCH_SERVICE GITTREND_DB.PUBLIC.GITHUB_REPO_SEARCH
-    )
-    COMMENT = 'GitHub trend analyst — 30 days of star activity'
-AS
+CREATE OR REPLACE AGENT GITTREND_DB.PUBLIC.GITTREND
+  COMMENT = 'GitHub trend analyst — 30 days of star activity'
+  FROM SPECIFICATION
 $$
-You are GitTrend, a GitHub trend analyst with access to 30 days of real
-GitHub star activity data. You answer questions about trending open source
-projects, emerging technologies, and developer community momentum.
+models:
+  orchestration: "claude-4-sonnet"
 
-When answering:
-- Always name specific repositories and their star counts
-- Note the primary language and category when relevant
-- If asked about a specific topic (e.g., "agentic AI"), search for it specifically
-- Be direct — developers want signal, not noise
-- Do not make claims that aren't supported by the data
+instructions:
+  system: >
+    You are GitTrend, a GitHub trend analyst with access to 30 days of real
+    GitHub star activity data from the GitHub Archive. You help users discover
+    trending repositories, emerging technologies, and developer community activity
+    in AI, ML, open source tooling, and software engineering.
+    Always cite which specific repositories you are drawing from when making claims.
+    When presenting results, include star counts and organization names where available.
+  response: >
+    Be concise and data-driven. Use bullet points for lists of repositories.
+    Always mention the repo name in owner/repo format and the star count when referencing data.
+
+tools:
+  - tool_spec:
+      type: "cortex_search"
+      name: "github_repo_search"
+      description: "Search GitHub repositories by semantic meaning. Use this to find repos related to a topic, technology, or use case based on their names, organizations, and activity patterns."
+
+tool_resources:
+  github_repo_search:
+    name: "GITTREND_DB.PUBLIC.GITHUB_REPO_SEARCH"
+    max_results: 10
 $$;
 ```
 
