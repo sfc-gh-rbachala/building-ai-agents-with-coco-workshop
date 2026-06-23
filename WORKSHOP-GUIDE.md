@@ -73,8 +73,8 @@ SELECT COUNT(*) FROM GITTREND_DB.PUBLIC.GITHUB_EVENTS;
 ```
 
 ### 3. Verify CoCo is available
-In Snowsight, look for **CoCo** in the left nav (the coding agent icon).
-If you don't see it, go to **Admin → Snowsight Features** and enable it.
+In Snowsight, select the **Cortex Code icon** in the lower-right corner. The CoCo panel opens on the right side.
+If you don't see it, confirm your role has `SNOWFLAKE.COPILOT_USER` and `SNOWFLAKE.CORTEX_USER` granted (trial accounts created via the workshop link should have this by default).
 
 > **Bring your laptop tonight.** This is a hands-on build session.
 > If you hit issues during setup, arrive by 6:45 PM and we'll help you get sorted.
@@ -109,7 +109,7 @@ CoWork                             →  where you ask it questions
 ## Step 1 — Orient CoCo to Your Data
 **⏱ 5–10 min**
 
-Open CoCo from the left nav in Snowsight. You'll see a chat interface — this is your AI coding partner for the session. It already knows your account, your databases, and your schemas.
+Open CoCo by selecting the Cortex Code icon in the lower-right corner of Snowsight. You'll see a chat panel on the right — this is your AI coding partner for the session. It already knows your account, your databases, and your schemas.
 
 ### Your first prompt
 
@@ -164,7 +164,7 @@ Click **Run** in the CoCo output or paste the SQL into a new worksheet. You shou
 
 > **Checkpoint 2:** You have a result set with 20 rows — real repo names, real star counts from the last 30 days.
 >
-> **Bonus:** Is OpenClaw in the results? (It should be — it's the fastest-growing open source project on GitHub right now.) If so, you're looking at the same dataset that's shaping the entire AI developer community.
+> **Bonus:** Is `NousResearch/hermes-agent` at the top? (It should be — it's one of the fastest-growing open source agent frameworks on GitHub right now.) If so, you're looking at the same dataset that's shaping the entire AI developer community.
 
 ---
 
@@ -315,7 +315,7 @@ tool_resources:
 $$;
 ```
 
-> **Checkpoint 5:** `SHOW CORTEX AGENTS` returns `GITTREND`. You're done building.
+> **Checkpoint 5:** `SHOW AGENTS` returns `GITTREND`. You're done building.
 
 ---
 
@@ -326,6 +326,8 @@ $$;
 1. Open **CoWork** from the left nav
 2. Find **GitTrend** in your agents list
 3. Ask it anything
+
+> **Tip:** If GitTrend doesn't initially appear in CoWork, navigate to **Agents** from the left nav, select the **GITTREND** agent, confirm that **Snowflake CoWork** is enabled in the About/Overview section, then select **Preview in Snowflake CoWork** in the top right.
 
 ### Option B: Test directly in SQL
 
@@ -395,11 +397,11 @@ Replace GH Archive with your product telemetry, support tickets,
 sales data, or internal docs.
 
 **Resources:**
-- [Free Snowflake trial](https://snowflake.com/try)
-- [CoCo documentation](https://docs.snowflake.com/en/user-guide/snowflake-cortex/cortex-code)
+- [Free Snowflake trial](https://signup.snowflake.com/?t=521d04bacb9556ae0a2fcb837fbf1db2e78f9e0581a062acb9c7e4100ac1eba6)
+- [CoCo documentation](https://docs.snowflake.com/en/user-guide/cortex-code/cortex-code-snowsight)
 - [Getting Started with Cortex Agents](https://www.snowflake.com/en/developers/guides/getting-started-with-cortex-agents/)
 - [Build an End-to-End App with CoCo](https://www.snowflake.com/en/developers/guides/sfguide-build-end-to-end-ai-app-on-snowflake/)
-- [Getting Started with Snowflake CoWork](https://www.snowflake.com/en/developers/guides/getting-started-with-snowflake-cowork/)
+- [Getting Started with Snowflake CoWork](https://docs.snowflake.com/en/user-guide/snowflake-cortex/snowflake-cowork)
 - [Getting Started with the Snowflake MCP Server](https://www.snowflake.com/en/developers/guides/getting-started-with-snowflake-mcp-server/)
 - [Getting Started with Snowflake Cortex AI](https://quickstarts.snowflake.com/guide/getting-started-with-snowflake-cortex-ai/)
 
