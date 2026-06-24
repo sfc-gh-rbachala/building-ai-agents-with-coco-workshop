@@ -164,7 +164,9 @@ Click **Run** in the CoCo output or paste the SQL into a new worksheet. You shou
 
 > **Checkpoint 2:** You have a result set with 20 rows — real repo names, real star counts from the last 30 days.
 >
-> **Bonus:** Is `NousResearch/hermes-agent` at the top? (It should be — it's one of the fastest-growing open source agent frameworks on GitHub right now.) If so, you're looking at the same dataset that's shaping the entire AI developer community.
+> **The moment:** Say the name at the top of your list out loud. That's the real signal of what the developer community is building right now — not a prediction, not a model's training data, the actual activity from the last 30 days.
+>
+> **Bonus:** If you see **OpenClaw** in the results — that's the project from Dave Nielsen's 3:30 workshop. Your agent just discovered it independently from real GitHub star data. That's not a coincidence. That's signal.
 
 ---
 

@@ -112,6 +112,7 @@ WHERE EVENT_TYPE = 'WatchEvent'
    OR LOWER(REPO_NAME) LIKE '%ai%'
    OR LOWER(REPO_NAME) LIKE '%ml%'
    OR LOWER(REPO_NAME) LIKE '%mcp%'
+   OR LOWER(REPO_NAME) LIKE '%openclaw%'  -- explicit include for the June 30 TechEquity session
   )
 GROUP BY REPO_NAME
 HAVING COUNT(*) >= 10;
