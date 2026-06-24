@@ -207,7 +207,12 @@ tool_resources:
 $$;
 
 -- Verify
-SHOW CORTEX AGENTS IN SCHEMA GITTREND_DB.PUBLIC;
+SHOW AGENTS IN SCHEMA GITTREND_DB.PUBLIC;
+
+-- NOTE: If GitTrend doesn't initially appear in CoWork, navigate to Agents
+-- from the left nav, select the GITTREND agent, confirm that Snowflake CoWork
+-- is enabled in the About/Overview section, then select "Preview in Snowflake
+-- CoWork" in the top right.
 
 
 -- ============================================================

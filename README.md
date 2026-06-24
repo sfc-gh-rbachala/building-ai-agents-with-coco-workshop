@@ -69,8 +69,8 @@ SELECT COUNT(*) FROM GITTREND_DB.PUBLIC.GITHUB_EVENTS; -- expect ~107M
 ```
 
 ### 3. Verify CoCo is available
-In Snowsight, look for **CoCo** in the left nav.
-If you don't see it: **Admin → Snowsight Features → Enable CoCo**.
+In Snowsight, select the **Cortex Code icon** in the lower-right corner. The CoCo panel opens on the right side.
+If you don't see it, confirm your role has `SNOWFLAKE.COPILOT_USER` and `SNOWFLAKE.CORTEX_USER` granted (trial accounts created via the workshop link should have this by default).
 
 ---
 
