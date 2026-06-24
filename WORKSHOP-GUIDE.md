@@ -146,8 +146,8 @@ Using the GITTREND_DB.PUBLIC.GITHUB_EVENTS table:
 
 Write a SQL query that finds the top 20 repositories
 that gained the most stars in the last 30 days,
-where the repo name or description suggests AI, ML,
-LLM, agent, or open source tooling.
+where the repo name suggests AI, ML, LLM, agent,
+or open source (e.g. names containing "open").
 
 Include: repo name and stars gained.
 Order by stars gained descending.
