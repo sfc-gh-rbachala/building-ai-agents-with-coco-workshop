@@ -71,6 +71,37 @@ PATTERN = '.*json.gz';
 
 -- Verify (~107M rows expected)
 SELECT COUNT(*) FROM GITTREND_DB.PUBLIC.GITHUB_EVENTS;
+
+-- Additional stage that the agent will write to
+CREATE STAGE IF NOT EXISTS GITTREND_DB.PUBLIC.CODE_STAGE
+  DIRECTORY = (ENABLE = TRUE)
+  ENCRYPTION = (TYPE = 'SNOWFLAKE_SSE');   -- SSE => allows presigned-URL downloads
+
+-- Custom tool used by the agent: writes arbitrary code/text to a file on the stage
+CREATE OR REPLACE PROCEDURE GITTREND_DB.PUBLIC.SAVE_CODE_TO_STAGE(
+    FILE_NAME STRING,
+    CODE STRING
+)
+RETURNS STRING
+LANGUAGE PYTHON
+RUNTIME_VERSION = '3.10'
+PACKAGES = ('snowflake-snowpark-python')
+HANDLER = 'run'
+AS
+$$
+import io
+
+def run(session, file_name, code):
+    stage_path = "@GITTREND_DB.PUBLIC.CODE_STAGE"
+    session.file.put_stream(
+        io.BytesIO(code.encode('utf-8')),
+        f"{stage_path}/{file_name}",
+        auto_compress=False,
+        overwrite=True
+    )
+    return f"Saved {file_name} to {stage_path}"
+$$;
+
 ```
 
 ### 3. Verify CoCo is available
@@ -279,6 +310,26 @@ Create a Cortex Agent called GITTREND that:
    - It should answer questions about trending repos, emerging technologies,
      and developer community activity
    - It should always cite which repos it's drawing from
+4. Has a custom tool called SaveCodeToStage that lets the agent write code/SQL
+   to a file on an internal stage when the user asks to save or export code:
+   - Tool type: generic (backed by the stored procedure
+     GITTREND_DB.PUBLIC.SAVE_CODE_TO_STAGE(VARCHAR, VARCHAR), which writes the
+     given text to @GITTREND_DB.PUBLIC.CODE_STAGE)
+   - Description: "Saves a code snippet, SQL query, or text to the CODE_STAGE
+     internal stage as a file. Call this whenever the user asks to save, export,
+     or write generated code to a stage or file. Pass FILE_NAME (e.g.
+     'trending_query.sql') and CODE (the full file contents)."
+   - input_schema (type: object) with two required string properties:
+       - FILE_NAME: "Name of the file to create, e.g. trending_query.sql"
+       - CODE: "The full code or text contents to write to the file"
+   - tool_resources entry for SaveCodeToStage:
+       - type: procedure
+       - identifier: GITTREND_DB.PUBLIC.SAVE_CODE_TO_STAGE
+       - name: GITTREND_DB.PUBLIC.SAVE_CODE_TO_STAGE(VARCHAR, VARCHAR)
+       - execution_environment: warehouse WORKSHOP_WH
+   - Update the orchestration instructions so the agent calls SaveCodeToStage
+     (with a descriptive FILE_NAME and the full CODE text) whenever the user
+     asks to save, export, or write code to a stage or file.
 
 Create it in the current database and schema.
 ```
@@ -310,7 +361,26 @@ tools:
       type: "cortex_search"
       name: "github_repo_search"
       description: "Search GitHub repositories by semantic meaning. Use this to find repos related to a topic, technology, or use case based on their names, organizations, and activity patterns."
-
+  - tool_spec:
+      type: "generic"
+      name: "SaveCodeToStage"
+      description: >
+        Saves a code snippet, SQL query, or text to the CODE_STAGE internal
+        stage as a file. Call this whenever the user asks to save, export, or
+        write generated code to a stage or file. Pass FILE_NAME (e.g.
+        'trending_query.sql') and CODE (the full file contents).
+      input_schema:
+        type: "object"
+        properties:
+          FILE_NAME:
+            description: "Name of the file to create, e.g. trending_query.sql"
+            type: "string"
+          CODE:
+            description: "The full code or text contents to write to the file"
+            type: "string"
+        required:
+          - FILE_NAME
+          - CODE
 tool_resources:
   github_repo_search:
     name: "GITTREND_DB.PUBLIC.GITHUB_REPO_SEARCH"
@@ -349,7 +419,7 @@ SELECT PARSE_JSON(
 ### Questions to try
 
 ```
-What's the fastest-growing AI project in the last 30 days?
+What's the fastest-growing AI project in the last 30 days? Also generate an interactive HTML dashboard file with Snowflake branding and save it to the internal stage @GITTREND_DB.PUBLIC.CODE_STAGE. Then provide me with the pre-signed URL so I can download it.
 
 What programming languages dominate trending AI repos right now?
 

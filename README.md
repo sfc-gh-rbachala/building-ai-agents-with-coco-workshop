@@ -66,6 +66,37 @@ FROM (SELECT $1,$1:id::STRING,$1:type::STRING,$1:created_at::TIMESTAMP,
 PATTERN = '.*json.gz';
 
 SELECT COUNT(*) FROM GITTREND_DB.PUBLIC.GITHUB_EVENTS; -- expect ~107M
+
+-- Additional stage that the agent will write to
+CREATE STAGE IF NOT EXISTS GITTREND_DB.PUBLIC.CODE_STAGE
+  DIRECTORY = (ENABLE = TRUE)
+  ENCRYPTION = (TYPE = 'SNOWFLAKE_SSE');   -- SSE => allows presigned-URL downloads
+
+-- Custom tool used by the agent: writes arbitrary code/text to a file on the stage
+CREATE OR REPLACE PROCEDURE GITTREND_DB.PUBLIC.SAVE_CODE_TO_STAGE(
+    FILE_NAME STRING,
+    CODE STRING
+)
+RETURNS STRING
+LANGUAGE PYTHON
+RUNTIME_VERSION = '3.10'
+PACKAGES = ('snowflake-snowpark-python')
+HANDLER = 'run'
+AS
+$$
+import io
+
+def run(session, file_name, code):
+    stage_path = "@GITTREND_DB.PUBLIC.CODE_STAGE"
+    session.file.put_stream(
+        io.BytesIO(code.encode('utf-8')),
+        f"{stage_path}/{file_name}",
+        auto_compress=False,
+        overwrite=True
+    )
+    return f"Saved {file_name} to {stage_path}"
+$$;
+
 ```
 
 ### 3. Verify CoCo is available
