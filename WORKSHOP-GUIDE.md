@@ -315,6 +315,11 @@ tool_resources:
   github_repo_search:
     name: "GITTREND_DB.PUBLIC.GITHUB_REPO_SEARCH"
     max_results: 10
+  SaveCodeToStage:
+    type: procedure
+    name: "GITTREND_DB.PUBLIC.SAVE_CODE_TO_STAGE(VARCHAR, VARCHAR)"
+    execution_environment:
+      warehouse: WORKSHOP_WH
 $$;
 ```
 
@@ -398,6 +403,59 @@ Always use fully qualified object names (DB.SCHEMA.OBJECT).
 The same 5-step pattern works on any dataset in your org.
 Replace GH Archive with your product telemetry, support tickets,
 sales data, or internal docs.
+
+**Bonus Step — Export Code to Stage:**
+Give GitTrend the ability to write generated SQL, reports, or HTML dashboards to a Snowflake internal stage and hand back a presigned download URL.
+
+Run this once (requires Anaconda terms acceptance on trial accounts — **Admin → Snowflake Marketplace → Anaconda**):
+
+```sql
+-- Stage the agent will write to
+CREATE STAGE IF NOT EXISTS GITTREND_DB.PUBLIC.CODE_STAGE
+  DIRECTORY = (ENABLE = TRUE)
+  ENCRYPTION = (TYPE = 'SNOWFLAKE_SSE');
+
+-- Stored procedure: writes any text file to the stage
+CREATE OR REPLACE PROCEDURE GITTREND_DB.PUBLIC.SAVE_CODE_TO_STAGE(
+    FILE_NAME STRING,
+    CODE STRING
+)
+RETURNS STRING
+LANGUAGE PYTHON
+RUNTIME_VERSION = '3.10'
+PACKAGES = ('snowflake-snowpark-python')
+HANDLER = 'run'
+AS
+$$
+import io
+
+def run(session, file_name, code):
+    stage_path = "@GITTREND_DB.PUBLIC.CODE_STAGE"
+    session.file.put_stream(
+        io.BytesIO(code.encode('utf-8')),
+        f"{stage_path}/{file_name}",
+        auto_compress=False,
+        overwrite=True
+    )
+    return f"Saved {file_name} to {stage_path}"
+$$;
+```
+
+Then recreate GitTrend with the export tool added — paste this into CoCo:
+
+```
+Update GITTREND to add a tool called SaveCodeToStage backed by the stored
+procedure GITTREND_DB.PUBLIC.SAVE_CODE_TO_STAGE(VARCHAR, VARCHAR).
+The tool should write any generated code or text to @GITTREND_DB.PUBLIC.CODE_STAGE
+when the user asks to save, export, or download a file.
+Use WORKSHOP_WH as the execution warehouse.
+```
+
+Then ask it:
+```
+Generate an HTML dashboard of the top 10 trending AI repos with star counts
+and save it to the stage. Give me the presigned URL to download it.
+```
 
 **Resources:**
 - [Free Snowflake trial](https://signup.snowflake.com/?t=521d04bacb9556ae0a2fcb837fbf1db2e78f9e0581a062acb9c7e4100ac1eba6)

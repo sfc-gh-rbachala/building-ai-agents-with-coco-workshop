@@ -244,3 +244,101 @@ SELECT PARSE_JSON(
         '{"query": "RAG retrieval augmented generation", "columns": ["repo_name","description","stars_gained"], "limit": 5}'
     )
 ) AS results;
+
+
+-- ============================================================
+-- BONUS — Export Code to Stage (Take It Further)
+-- ============================================================
+-- Requires Anaconda terms acceptance:
+--   Admin → Snowflake Marketplace → Anaconda → Accept terms
+
+-- Step 1: Create the stage (SSE encryption enables presigned-URL downloads)
+CREATE STAGE IF NOT EXISTS GITTREND_DB.PUBLIC.CODE_STAGE
+  DIRECTORY = (ENABLE = TRUE)
+  ENCRYPTION = (TYPE = 'SNOWFLAKE_SSE');
+
+-- Step 2: Create the stored procedure
+CREATE OR REPLACE PROCEDURE GITTREND_DB.PUBLIC.SAVE_CODE_TO_STAGE(
+    FILE_NAME STRING,
+    CODE STRING
+)
+RETURNS STRING
+LANGUAGE PYTHON
+RUNTIME_VERSION = '3.10'
+PACKAGES = ('snowflake-snowpark-python')
+HANDLER = 'run'
+AS
+$$
+import io
+
+def run(session, file_name, code):
+    stage_path = "@GITTREND_DB.PUBLIC.CODE_STAGE"
+    session.file.put_stream(
+        io.BytesIO(code.encode('utf-8')),
+        f"{stage_path}/{file_name}",
+        auto_compress=False,
+        overwrite=True
+    )
+    return f"Saved {file_name} to {stage_path}"
+$$;
+
+-- Step 3: Recreate GitTrend with the SaveCodeToStage tool added
+CREATE OR REPLACE AGENT GITTREND_DB.PUBLIC.GITTREND
+    COMMENT = 'GitHub trend analyst — 30 days of real star activity'
+    FROM SPECIFICATION
+$$
+models:
+  orchestration: "claude-sonnet-4-5"
+
+instructions:
+  system: >
+    You are GitTrend, a GitHub trend analyst with access to 30 days of real
+    GitHub star activity data from the GitHub Archive. You help users discover
+    trending repositories, emerging technologies, and developer community activity
+    in AI, ML, open source tooling, and software engineering.
+    Always cite which specific repositories you are drawing from when making claims.
+    When presenting results, include star counts and organization names where available.
+    When the user asks to save, export, or download generated code or a report,
+    call SaveCodeToStage with a descriptive FILE_NAME and the full content as CODE.
+  response: >
+    Be concise and data-driven. Use bullet points for lists of repositories.
+    Always mention the repo name in owner/repo format and the star count when referencing data.
+
+tools:
+  - tool_spec:
+      type: "cortex_search"
+      name: "github_repo_search"
+      description: "Search GitHub repositories by semantic meaning."
+  - tool_spec:
+      type: "generic"
+      name: "SaveCodeToStage"
+      description: >
+        Saves a code snippet, SQL query, or text to the CODE_STAGE internal stage as a file.
+        Call this whenever the user asks to save, export, or write generated code to a file.
+        Pass FILE_NAME (e.g. 'dashboard.html') and CODE (the full file contents).
+      input_schema:
+        type: "object"
+        properties:
+          FILE_NAME:
+            description: "Name of the file to create, e.g. dashboard.html"
+            type: "string"
+          CODE:
+            description: "The full code or text contents to write to the file"
+            type: "string"
+        required:
+          - FILE_NAME
+          - CODE
+
+tool_resources:
+  github_repo_search:
+    name: "GITTREND_DB.PUBLIC.GITHUB_REPO_SEARCH"
+    max_results: 10
+  SaveCodeToStage:
+    type: procedure
+    name: "GITTREND_DB.PUBLIC.SAVE_CODE_TO_STAGE(VARCHAR, VARCHAR)"
+    execution_environment:
+      warehouse: WORKSHOP_WH
+$$;
+
+-- Verify
+SHOW AGENTS IN SCHEMA GITTREND_DB.PUBLIC;
