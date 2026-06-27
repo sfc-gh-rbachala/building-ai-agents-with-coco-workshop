@@ -76,7 +76,7 @@ SELECT COUNT(*) FROM GITTREND_DB.PUBLIC.GITHUB_EVENTS; -- expect ~107M
 
 Same pattern works on any dataset in your organization.
 
----
+
 
 ## Resources
 
