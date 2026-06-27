@@ -145,25 +145,27 @@ Now tell CoCo what you want to find.
 ```
 Using the GITTREND_DB.PUBLIC.GITHUB_EVENTS table:
 
-Write a SQL query that finds the top 20 repositories
-that gained the most stars in the last 30 days,
+Create a view called GITTREND_DB.PUBLIC.V_TRENDING_AI_REPOS that finds
+repositories that gained the most stars in the last 30 days,
 where the repo name suggests AI, ML, LLM, agent,
 or open source (e.g. names containing "open").
 
-Include: repo name and stars gained.
-Order by stars gained descending.
+Include: repo name, stars gained, first and last star timestamps.
+Only include repos with 10 or more stars gained.
+
+Then query the view to show the top 20 repos by stars gained, descending.
 ```
 
 **What CoCo generates:**
-A query filtering `EVENT_TYPE = 'WatchEvent'`, grouping by `REPO_NAME`, and aggregating star counts over the date range.
+A `CREATE OR REPLACE VIEW` filtering `EVENT_TYPE = 'WatchEvent'`, grouping by `REPO_NAME`, and aggregating star counts — followed by a `SELECT` querying the view for the top 20 results.
 
 > **Note:** The dataset covers a fixed 30-day window loaded at setup time. All date filters use `-30 days` to stay within that window. The `description` field is not available in this dataset — repo names are used as the searchable identifier.
 
 ### Run it
 
-Click **Run** in the CoCo output or paste the SQL into a new worksheet. You should see a real table of the hottest AI repos right now.
+Click **Run** in the CoCo output or paste the SQL into a new worksheet.
 
-> **Checkpoint 2:** You have a result set with 20 rows — real repo names, real star counts from the last 30 days.
+> **Checkpoint 2:** The view is created and the top 20 repos appear — real repo names, real star counts from the last 30 days.
 >
 > **The moment:** Say the name at the top of your list out loud. That's the real signal of what the developer community is building right now — not a prediction, not a model's training data, the actual activity from the last 30 days.
 >
@@ -223,34 +225,28 @@ SELECT SNOWFLAKE.CORTEX.COMPLETE(
 ### Prompt
 
 ```
-Create a Cortex Search Service called GITHUB_REPO_SEARCH
-using the GITHUB_EVENTS data we loaded.
+Create a Cortex Search Service called GITTREND_DB.PUBLIC.GITHUB_REPO_SEARCH
+using the V_TRENDING_AI_REPOS view we just created.
 
-It should index repo names so users can search semantically —
-for example, "find repos related to autonomous agents" or
-"what projects are working on RAG pipelines".
+It should search on the description column and include repo_name
+and stars_gained as attributes.
 
-Use WORKSHOP_WH as the warehouse.
+If description is absent, use repo_name as description.
+
+Use WORKSHOP_WH as the warehouse and a target lag of 1 hour.
 ```
 
 **What CoCo generates:**
 
 ```sql
-CREATE OR REPLACE CORTEX SEARCH SERVICE GITHUB_REPO_SEARCH
-  ON repo_name
-  ATTRIBUTES repo_name, stars_gained
-  WAREHOUSE = WORKSHOP_WH
-  TARGET_LAG = '1 hour'
+CREATE OR REPLACE CORTEX SEARCH SERVICE GITTREND_DB.PUBLIC.GITHUB_REPO_SEARCH
+    ON description
+    ATTRIBUTES repo_name, stars_gained
+    WAREHOUSE = WORKSHOP_WH
+    TARGET_LAG = '1 hour'
 AS (
-  SELECT
-      REPO_NAME                AS repo_name,
-      REPO_NAME                AS description,
-      COUNT(*)                 AS stars_gained
-  FROM GITTREND_DB.PUBLIC.GITHUB_EVENTS
-  WHERE EVENT_TYPE = 'WatchEvent'
-    AND CREATED_AT >= DATEADD('day', -30, CURRENT_TIMESTAMP())
-  GROUP BY REPO_NAME
-  HAVING COUNT(*) >= 5
+    SELECT repo_name, description, stars_gained
+    FROM V_TRENDING_AI_REPOS
 );
 ```
 
@@ -346,7 +342,7 @@ $$;
 SELECT PARSE_JSON(
     SNOWFLAKE.CORTEX.SEARCH_PREVIEW(
         'GITTREND_DB.PUBLIC.GITHUB_REPO_SEARCH',
-        '{"query": "fastest growing AI agent framework", "columns": ["repo_name","description","stars_gained"], "limit": 5}'
+        '{"query": "fastest growing AI agent framework", "columns": ["repo_name","stars_gained"], "limit": 5}'
     )
 ) AS results;
 ```

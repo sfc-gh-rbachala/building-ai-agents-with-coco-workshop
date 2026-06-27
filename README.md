@@ -67,6 +67,27 @@ PATTERN = '.*json.gz';
 
 SELECT COUNT(*) FROM GITTREND_DB.PUBLIC.GITHUB_EVENTS; -- expect ~107M
 ```
+
+### 3. Verify CoCo is available
+In Snowsight, select the **Cortex Code icon** in the lower-right corner. The CoCo panel opens on the right side.
+If you don't see it, confirm your role has `SNOWFLAKE.COPILOT_USER` and `SNOWFLAKE.CORTEX_USER` granted (trial accounts created via the workshop link should have this by default).
+
+---
+
+## Workshop Files
+
+| File | What it is |
+|---|---|
+| [`WORKSHOP-GUIDE.md`](WORKSHOP-GUIDE.md) | Step-by-step guide — follow this during the session |
+| [`CHECKPOINTS.sql`](CHECKPOINTS.sql) | Fallback SQL for each step — use if CoCo gets stuck |
+
+---
+
+## The 5-Step Pattern
+
+![Workshop teaser — intro to payoff](workshop-teaser.gif)
+
+```
 1. Load the data         →  107M GitHub events via COPY INTO from public S3
 2. CoCo explores         →  Describe the schema, find the right columns
 3. Build the query       →  Trending AI repos by star activity, last 30 days
