@@ -5,18 +5,19 @@
 
 ---
 
-## Before You Arrive — Do This First (10 minutes)
+## Step 0 — Account Setup (First 10 minutes of session)
 
-Complete these steps **before June 30** so we can skip setup during the session.
+We do this together at the start. **Bring your laptop — no prep needed.**
 
 ### 1. Create a free Snowflake trial account
-Use this event-specific link to sign up — it enables all AI features for the workshop:
+Use this event-specific link — it enables all AI features automatically:
 **[Sign up here](https://signup.snowflake.com/?t=521d04bacb9556ae0a2fcb837fbf1db2e78f9e0581a062acb9c7e4100ac1eba6)**
 Choose **AWS US East** when prompted. Select **AI Data Cloud** as your use case.
-You'll use this account for everything in tonight's workshop.
+
+> Takes ~2 minutes. While yours activates, the data load below can run in parallel.
 
 ### 2. Load the GitHub Archive dataset
-In Snowsight, open a new SQL Worksheet and run this block — it creates your database, loads ~107M real GitHub events from a public S3 bucket, and enables Cortex AI. **This takes ~4 minutes on the Small warehouse — start it now.**
+In Snowsight, open a new SQL Worksheet and run this block — it creates your database, loads ~107M real GitHub events from a public S3 bucket, and enables Cortex AI. **Runs in ~4 minutes on the Small warehouse.**
 
 ```sql
 USE ROLE ACCOUNTADMIN;
@@ -73,12 +74,11 @@ PATTERN = '.*json.gz';
 SELECT COUNT(*) FROM GITTREND_DB.PUBLIC.GITHUB_EVENTS;
 ```
 
+> **While the data loads (~4 min):** listen to the intro slides. The load runs in the background — you'll be ready for Step 1 by the time we get there.
+
 ### 3. Verify CoCo is available
 In Snowsight, select the **Cortex Code icon** in the lower-right corner. The CoCo panel opens on the right side.
 If you don't see it, confirm your role has `SNOWFLAKE.COPILOT_USER` and `SNOWFLAKE.CORTEX_USER` granted (trial accounts created via the workshop link should have this by default).
-
-> **Bring your laptop tonight.** This is a hands-on build session.
-> If you hit issues during setup, arrive by 6:45 PM and we'll help you get sorted.
 
 ---
 

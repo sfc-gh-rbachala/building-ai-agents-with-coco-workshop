@@ -23,54 +23,15 @@ CoCo writes every SQL statement. You direct it. You own the result.
 
 ---
 
-## Before You Arrive (Do This First)
+## What to Bring
 
-Complete these steps **before June 30** so we can skip setup during the session.
+**Just your laptop and a willingness to build.**
 
-### 1. Create a free Snowflake trial account
-Use the event-specific link below — it enables all AI features for the workshop:
-**[Sign up here](https://signup.snowflake.com/?t=521d04bacb9556ae0a2fcb837fbf1db2e78f9e0581a062acb9c7e4100ac1eba6)**
-Choose **AWS US East** when prompted. Select **AI Data Cloud** as your use case.
+We handle everything in the session — account signup, data load, and agent creation all happen live together. No prep needed.
 
-### 2. Load the GitHub Archive dataset
-Open a new SQL Worksheet in Snowsight and run the full setup block below. It creates your database and loads ~107M real GitHub events from a public S3 bucket. **Takes ~4 minutes — start this now.**
+If you want a head start: sign up for a free Snowflake trial using the event link below **before arriving** and run the setup SQL in Step 0 of the Workshop Guide. It loads ~107M GitHub events (~4 min) and means you'll be building from minute one.
 
-```sql
-USE ROLE ACCOUNTADMIN;
-CREATE DATABASE IF NOT EXISTS GITTREND_DB;
-CREATE SCHEMA IF NOT EXISTS GITTREND_DB.PUBLIC;
-CREATE WAREHOUSE IF NOT EXISTS WORKSHOP_WH WAREHOUSE_SIZE = SMALL AUTO_SUSPEND = 60;
-USE DATABASE GITTREND_DB;
-USE SCHEMA GITTREND_DB.PUBLIC;
-USE WAREHOUSE WORKSHOP_WH;
-ALTER ACCOUNT SET CORTEX_ENABLED_CROSS_REGION = 'ANY_REGION';
-
-CREATE OR REPLACE FILE FORMAT GITHUB_JSON_FORMAT
-  TYPE = 'JSON' STRIP_OUTER_ARRAY = TRUE COMPRESSION = 'GZIP';
-
-CREATE OR REPLACE STAGE GITHUB_STAGE
-  URL = 's3://sfquickstarts/vhol_building_ai_agents_with_coco/'
-  FILE_FORMAT = GITHUB_JSON_FORMAT;
-
-CREATE OR REPLACE TABLE GITTREND_DB.PUBLIC.GITHUB_EVENTS (
-    RAW VARIANT, EVENT_ID STRING, EVENT_TYPE STRING,
-    CREATED_AT TIMESTAMP, ACTOR_LOGIN STRING, ACTOR_ID NUMBER,
-    REPO_NAME STRING, REPO_ID NUMBER, ORG_LOGIN STRING, IS_PUBLIC BOOLEAN
-);
-
-COPY INTO GITTREND_DB.PUBLIC.GITHUB_EVENTS
-FROM (SELECT $1,$1:id::STRING,$1:type::STRING,$1:created_at::TIMESTAMP,
-    $1:actor:login::STRING,$1:actor:id::NUMBER,$1:repo:name::STRING,
-    $1:repo:id::NUMBER,$1:org:login::STRING,$1:public::BOOLEAN
-    FROM @GITHUB_STAGE)
-PATTERN = '.*json.gz';
-
-SELECT COUNT(*) FROM GITTREND_DB.PUBLIC.GITHUB_EVENTS; -- expect ~107M
-```
-
-### 3. Verify CoCo is available
-In Snowsight, select the **Cortex Code icon** in the lower-right corner. The CoCo panel opens on the right side.
-If you don't see it, confirm your role has `SNOWFLAKE.COPILOT_USER` and `SNOWFLAKE.CORTEX_USER` granted (trial accounts created via the workshop link should have this by default).
+**[Event trial signup](https://signup.snowflake.com/?t=521d04bacb9556ae0a2fcb837fbf1db2e78f9e0581a062acb9c7e4100ac1eba6)** — choose **AWS US East**, select **AI Data Cloud**.
 
 ---
 
