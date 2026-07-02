@@ -2,9 +2,19 @@
 
 **TechEquity AI Forum — June 30, 2026 | 7:00 PM | Snowflake SVAI Hub, Menlo Park**
 
-Workshop materials for *Build an AI Agent in 60 Minutes with Snowflake CoCo*, presented by [Richie Bachala](https://www.snowflake.com/en/blog/authors/richie-bachala/), Solutions Architecture Leader at Snowflake.
+Workshop materials for *Build an AI Agent in 60 Minutes with Snowflake CoCo*, presented by [Richie Bachala](https://www.snowflake.com/en/blog/authors/richie-bachala/), Solutions Architecture Leader & Zach Martin, Solutions Consultant — Snowflake.
 
 ![Workshop demo — 5-step CoCo build](TechEquity-Workshop-Demo.gif)
+
+---
+
+## Demo Videos
+
+| Video | Link |
+|---|---|
+| 1 — Intro & Overview | [Watch →](https://youtu.be/Fnx0xtOC92I) |
+| 2 — Full Build (Step-by-Step) | [Watch →](https://youtu.be/0o_7TmiaeGY) |
+| 3 — Bonus: Export to Stage | [Watch →](https://youtu.be/Fnx0xtOC92I) |
 
 ---
 
@@ -31,7 +41,7 @@ We handle everything in the session — account signup, data load, and agent cre
 
 If you want a head start: sign up for a free Snowflake trial using the event link below **before arriving** and run the setup SQL in Step 0 of the Workshop Guide. It loads ~107M GitHub events (~4 min) and means you'll be building from minute one.
 
-**[Event trial signup](https://signup.snowflake.com/?t=521d04bacb9556ae0a2fcb837fbf1db2e78f9e0581a062acb9c7e4100ac1eba6)** — choose **AWS US East**, select **AI Data Cloud**.
+**[Event trial signup](https://signup.snowflake.com/?t=521d04bacb9556ae0a2fcb837fbf1db2e78f9e0581a062acb9c7e4100ac1eba6)** — choose **AWS US East (Ohio)**, select **AI Data Cloud**. Do not select AWS US East (N. Virginia).
 
 ---
 
@@ -41,6 +51,7 @@ If you want a head start: sign up for a free Snowflake trial using the event lin
 |---|---|
 | [`WORKSHOP-GUIDE.md`](WORKSHOP-GUIDE.md) | Step-by-step guide — follow this during the session |
 | [`CHECKPOINTS.sql`](CHECKPOINTS.sql) | Fallback SQL for each step — use if CoCo gets stuck |
+| [`workshop-materials/`](workshop-materials/) | Slides and additional post-event resources |
 
 ---
 
@@ -58,7 +69,7 @@ If you want a head start: sign up for a free Snowflake trial using the event lin
 
 Same pattern works on any dataset in your organization.
 
-
+---
 
 ## Resources
 
@@ -72,10 +83,12 @@ Same pattern works on any dataset in your organization.
 
 ---
 
-## About the Presenter
+## About the Presenters
 
-**Richie Bachala** — Solutions Architecture Leader, Snowflake  
+**Richie Bachala** — Solutions Architecture Leader, Snowflake
 [snowflake.com/en/blog/authors/richie-bachala](https://www.snowflake.com/en/blog/authors/richie-bachala/)
+
+**Zach Martin** — Solutions Consultant, Snowflake
 
 ---
 
