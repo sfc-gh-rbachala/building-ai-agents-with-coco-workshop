@@ -11,15 +11,22 @@
 
 This session runs in the CoCo CLI, not Snowsight. Complete these two things before you get there.
 
-### 1. Install the Snowflake CLI
+### 1. Install CoCo CLI
+
+**macOS / Linux / WSL:**
 ```bash
-pip install snowflake-cli-labs
+curl -LsS https://ai.snowflake.com/static/cc-scripts/install.sh | sh
 ```
-Or via Homebrew:
+
+**Windows (PowerShell):**
+```powershell
+irm https://ai.snowflake.com/static/cc-scripts/install.ps1 | iex
+```
+
+This installs the `cortex` executable in `~/.local/bin`. Confirm it works:
 ```bash
-brew tap Snowflake-Labs/snowflake-cli && brew install snowflake-cli
+cortex --version
 ```
-Confirm it works: `snow --version`
 
 ### 2. Have a Snowflake account ready
 Use this event-specific link — it activates all AI features automatically:
@@ -81,34 +88,27 @@ Source data is read-only: GITTREND_DB.PUBLIC.GITHUB_EVENTS
 
 > **Why AGENTS.md matters:** CoCo reads this file at the start of every session. It knows your account, your warehouse, your constraints — without you re-explaining it every time. Under 200 lines keeps compliance near 100%. This file is the reason tonight's workflow is faster than anything you've seen in Snowsight.
 
-### 2. Connect to Snowflake
+### 2. Connect to Snowflake and start CoCo
+
+From inside the `gittrend-workshop/` folder, run:
 
 ```bash
-snow connection create
+cortex
 ```
 
-Follow the prompts: account identifier, username, password (or key-pair). Name the connection `workshop`.
+On first launch, a setup wizard guides you through creating a Snowflake connection — enter your account identifier, username, and password when prompted.
 
-Test it:
-```bash
-snow connection test --connection workshop
-```
+> **Account identifier format:** `orgname-accountname` (find it in Admin → Accounts in Snowsight). For trial accounts, typically `your-org-name-<random>`.
 
-> **Account identifier format:** Use `orgname-accountname` (from Admin → Accounts in Snowsight) or the legacy `accountname.region.cloud` format. For trial accounts, it's usually `your-org-name-<random>`.
+> **Already have a Snowflake CLI connection?** CoCo shares the same `~/.snowflake/connections.toml`. It will list your existing connections — just select one.
 
-### 3. Start CoCo
+Once connected, CoCo starts and automatically loads your `AGENTS.md`. You'll see a confirmation in the session header.
 
-```bash
-cortex code
-```
+> **For live demos or exploring production data:** relaunch with `cortex --sql-read-only` to prevent accidental writes. Toggle mid-session with `/sql-writes off`.
 
-You're now in the CoCo CLI. CoCo automatically detected your `AGENTS.md` and loaded your context. You'll see a confirmation in the session header.
+> **If your session context gets long:** type `/compact` to summarize the conversation and free up context without losing your place.
 
-> **For live demos or exploring production data:** launch with `cortex code --sql-read-only` to prevent accidental writes. You can toggle mid-session with `/sql-writes off`.
-
-> **If your session context gets long:** type `/compact` to summarize the conversation and free up context without losing your place. Useful once you're deep into the build steps.
-
-> **Didn't see AGENTS.md load?** Make sure you ran `cortex code` from the `gittrend-workshop/` directory — CoCo looks for AGENTS.md in the working directory.
+> **AGENTS.md not loaded?** Make sure you ran `cortex` from the `gittrend-workshop/` directory where the file lives.
 
 ---
 
@@ -184,7 +184,7 @@ The summary should:
 - Note any patterns across language, topic, or category
 - Be concise — 3 to 4 sentences max
 
-Use the 'claude-sonnet-4-5' model.
+Use the 'claude-sonnet-4-6' model.
 ```
 
 > **Note:** Use `AI_COMPLETE`, not `CORTEX.COMPLETE`. `CORTEX.COMPLETE` is deprecated and being retired in 2026. `AI_COMPLETE` is the canonical function going forward.

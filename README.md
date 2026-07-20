@@ -12,18 +12,19 @@ Workshop materials for *Foundation to Intelligence Series — Level 2: Build, Ex
 
 This session runs in the **CoCo CLI**, not the Snowsight UI. Two things to do before you get there:
 
-### 1. Install the Snowflake CLI
+### 1. Install CoCo CLI
 
+**macOS / Linux / WSL:**
 ```bash
-pip install snowflake-cli-labs
+curl -LsS https://ai.snowflake.com/static/cc-scripts/install.sh | sh
 ```
 
-Or via Homebrew (Mac):
-```bash
-brew tap Snowflake-Labs/snowflake-cli && brew install snowflake-cli
+**Windows (PowerShell):**
+```powershell
+irm https://ai.snowflake.com/static/cc-scripts/install.ps1 | iex
 ```
 
-Confirm it works: `snow --version`
+Confirm the install worked: `cortex --version`
 
 ### 2. Create a free Snowflake trial account
 

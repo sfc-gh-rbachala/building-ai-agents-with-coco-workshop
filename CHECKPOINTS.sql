@@ -129,7 +129,7 @@ SELECT * FROM V_TRENDING_AI_REPOS ORDER BY stars_gained DESC LIMIT 20;
 --   ALTER ACCOUNT SET CORTEX_ENABLED_CROSS_REGION = 'ANY_REGION';
 
 SELECT AI_COMPLETE(
-    'claude-sonnet-4-5',
+    'claude-sonnet-4-6',
     CONCAT(
         'You are a developer trend analyst. ',
         'Based on the following GitHub star data from the last 30 days, ',
@@ -176,12 +176,13 @@ SHOW CORTEX SEARCH SERVICES IN SCHEMA GITTREND_DB.PUBLIC;
 -- CHECKPOINT 5 — Create the GitTrend Cortex Agent
 -- ============================================================
 
+-- NOTE: orchestration: auto — Snowflake picks the best available model automatically
 CREATE OR REPLACE AGENT GITTREND_DB.PUBLIC.GITTREND
     COMMENT = 'GitHub trend analyst — 30 days of real star activity'
     FROM SPECIFICATION
 $$
 models:
-  orchestration: auto   -- Snowflake picks the best available model; improves automatically over time
+  orchestration: auto
 
 instructions:
   system: >
