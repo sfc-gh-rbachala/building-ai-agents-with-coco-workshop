@@ -1,8 +1,9 @@
 -- ============================================================
 -- GITTREND WORKSHOP CHECKPOINTS
--- TechEquity AI Forum | June 30, 2026
+-- Foundation to Intelligence Series — Level 2
+-- TechEquity AI Forum | July 28, 2026
 -- Use these if CoCo gets stuck or you fall behind.
--- Run each checkpoint in a Snowflake SQL Worksheet.
+-- Run each checkpoint in a Snowflake SQL Worksheet or via snow sql.
 -- ============================================================
 
 -- SETUP (run once at the start)
@@ -13,7 +14,7 @@ CREATE WAREHOUSE IF NOT EXISTS WORKSHOP_WH WAREHOUSE_SIZE = SMALL AUTO_SUSPEND =
 USE DATABASE GITTREND_DB;
 USE SCHEMA GITTREND_DB.PUBLIC;
 USE WAREHOUSE WORKSHOP_WH;
--- Required for CORTEX.COMPLETE (run this now, not later)
+-- Required for AI_COMPLETE cross-region inference
 ALTER ACCOUNT SET CORTEX_ENABLED_CROSS_REGION = 'ANY_REGION';
 
 -- Load GH Archive data from public S3 (~4 min on Small warehouse)
@@ -63,14 +64,13 @@ SELECT COUNT(*) FROM GITTREND_DB.PUBLIC.GITHUB_EVENTS;
 -- ============================================================
 -- CHECKPOINT 1 — Explore the GITHUB_EVENTS schema
 -- ============================================================
--- Understand the table structure and what WatchEvent means
 
 DESCRIBE TABLE GITTREND_DB.PUBLIC.GITHUB_EVENTS;
 
 -- Sample 5 rows to see the structure
 SELECT * FROM GITTREND_DB.PUBLIC.GITHUB_EVENTS LIMIT 5;
 
--- See all the event types available
+-- See all event types available
 SELECT EVENT_TYPE, COUNT(*) AS event_count
 FROM GITTREND_DB.PUBLIC.GITHUB_EVENTS
 WHERE CREATED_AT >= DATEADD('day', -30, CURRENT_TIMESTAMP())
@@ -112,7 +112,7 @@ WHERE EVENT_TYPE = 'WatchEvent'
    OR LOWER(REPO_NAME) LIKE '%ai%'
    OR LOWER(REPO_NAME) LIKE '%ml%'
    OR LOWER(REPO_NAME) LIKE '%mcp%'
-   OR LOWER(REPO_NAME) LIKE '%openclaw%'  -- explicit include for the June 30 TechEquity session
+   OR LOWER(REPO_NAME) LIKE '%open%'
   )
 GROUP BY REPO_NAME
 HAVING COUNT(*) >= 10;
@@ -122,16 +122,14 @@ SELECT * FROM V_TRENDING_AI_REPOS ORDER BY stars_gained DESC LIMIT 20;
 
 
 -- ============================================================
--- CHECKPOINT 3 — Natural language summary with CORTEX.COMPLETE
+-- CHECKPOINT 3 — Natural language summary with AI_COMPLETE
 -- ============================================================
--- ALTER ACCOUNT is already in the SETUP block above.
+-- NOTE: Use AI_COMPLETE — CORTEX.COMPLETE is deprecated (EOL end of 2026).
 -- If you jumped here directly without running SETUP, run this first:
 --   ALTER ACCOUNT SET CORTEX_ENABLED_CROSS_REGION = 'ANY_REGION';
--- NOTE: CORTEX.COMPLETE is being replaced by AI_COMPLETE (end of 2026).
--- Both work today. Use AI_COMPLETE in new projects going forward.
 
-SELECT SNOWFLAKE.CORTEX.COMPLETE(
-    'claude-4-sonnet',
+SELECT AI_COMPLETE(
+    'claude-sonnet-4-5',
     CONCAT(
         'You are a developer trend analyst. ',
         'Based on the following GitHub star data from the last 30 days, ',
@@ -183,7 +181,7 @@ CREATE OR REPLACE AGENT GITTREND_DB.PUBLIC.GITTREND
     FROM SPECIFICATION
 $$
 models:
-  orchestration: "claude-sonnet-4-5"
+  orchestration: auto   -- Snowflake picks the best available model; improves automatically over time
 
 instructions:
   system: >
@@ -202,6 +200,9 @@ tools:
       type: "cortex_search"
       name: "github_repo_search"
       description: "Search GitHub repositories by semantic meaning. Use this to find repos related to a topic, technology, or use case based on their names, organizations, and activity patterns."
+  - tool_spec:
+      type: "data_to_chart"
+      name: "data_to_chart"
 
 tool_resources:
   github_repo_search:
@@ -212,18 +213,67 @@ $$;
 -- Verify
 SHOW AGENTS IN SCHEMA GITTREND_DB.PUBLIC;
 
--- NOTE: If GitTrend doesn't initially appear in CoWork, navigate to Agents
--- from the left nav, select the GITTREND agent, confirm that Snowflake CoWork
--- is enabled in the About/Overview section, then select "Preview in Snowflake
--- CoWork" in the top right.
+-- To test in CoWork: left nav → AI & ML → Agents → GITTREND → Preview in Snowflake CoWork
 
 
 -- ============================================================
--- RUN IT — Test GitTrend via CoWork or Search Preview
+-- CHECKPOINT 6 — Create the MCP Server and OAuth Integration
 -- ============================================================
--- Primary interface: CoWork (left nav → CoWork → find GitTrend → ask questions).
+-- This exposes GITTREND to Claude Desktop, Cursor, and any MCP-compatible client.
+
+-- Step 1: Create the MCP Server object
+CREATE OR REPLACE MCP SERVER GITTREND_DB.PUBLIC.GITTREND_MCP
+  FROM SPECIFICATION $$
+    tools:
+      - name: "gittrend"
+        type: "CORTEX_AGENT_RUN"
+        identifier: "GITTREND_DB.PUBLIC.GITTREND"
+        title: "GitTrend — GitHub Trend Analyst"
+        description: >
+          GitHub trend analyst with 30 days of real star activity data.
+          Ask about trending repos, emerging AI/ML projects, and developer momentum.
+  $$;
+
+-- Verify
+SHOW MCP SERVERS IN SCHEMA GITTREND_DB.PUBLIC;
+
+-- Step 2: Create OAuth security integration
+-- OAUTH_REDIRECT_URI below is for Claude Desktop.
+-- For Cursor: change to the redirect URI shown during Cursor's OAuth setup flow.
+CREATE OR REPLACE SECURITY INTEGRATION GITTREND_MCP_OAUTH
+  TYPE = OAUTH
+  OAUTH_CLIENT = CUSTOM
+  ENABLED = TRUE
+  OAUTH_CLIENT_TYPE = 'CONFIDENTIAL'
+  OAUTH_REDIRECT_URI = 'https://claude.ai/api/mcp/auth_callback';
+
+-- Step 3: Retrieve client credentials (save these — you need them for client config)
+SELECT SYSTEM$SHOW_OAUTH_CLIENT_SECRETS('GITTREND_MCP_OAUTH');
+
+-- Step 4: Set your user's default role + warehouse (required for MCP OAuth sessions)
+-- Replace <your_username> with your Snowflake username
+ALTER USER <your_username> SET DEFAULT_ROLE = 'ACCOUNTADMIN' DEFAULT_WAREHOUSE = 'WORKSHOP_WH';
+
+
+-- ============================================================
+-- MCP Server URL
+-- ============================================================
+-- Connect MCP clients to this URL:
 --
--- To test the Cortex Search service directly in SQL (verified working):
+--   https://<account-url>/api/v2/databases/GITTREND_DB/schemas/PUBLIC/mcp-servers/GITTREND_MCP
+--
+-- IMPORTANT: Use hyphens (-) instead of underscores (_) in your account URL hostname.
+-- Example: myorg-myaccount.snowflakecomputing.com (correct)
+--          my_org_my_account.snowflakecomputing.com (may cause MCP connection issues)
+--
+-- To find your account URL: Admin → Accounts in Snowsight → copy the account identifier
+-- Format: https://<orgname>-<accountname>.snowflakecomputing.com
+
+
+-- ============================================================
+-- RUN IT — Test via Search Preview (fallback, no MCP client needed)
+-- ============================================================
+
 SELECT PARSE_JSON(
     SNOWFLAKE.CORTEX.SEARCH_PREVIEW(
         'GITTREND_DB.PUBLIC.GITHUB_REPO_SEARCH',
@@ -244,101 +294,3 @@ SELECT PARSE_JSON(
         '{"query": "RAG retrieval augmented generation", "columns": ["repo_name","description","stars_gained"], "limit": 5}'
     )
 ) AS results;
-
-
--- ============================================================
--- BONUS — Export Code to Stage (Take It Further)
--- ============================================================
--- Requires Anaconda terms acceptance:
---   Admin → Snowflake Marketplace → Anaconda → Accept terms
-
--- Step 1: Create the stage (SSE encryption enables presigned-URL downloads)
-CREATE STAGE IF NOT EXISTS GITTREND_DB.PUBLIC.CODE_STAGE
-  DIRECTORY = (ENABLE = TRUE)
-  ENCRYPTION = (TYPE = 'SNOWFLAKE_SSE');
-
--- Step 2: Create the stored procedure
-CREATE OR REPLACE PROCEDURE GITTREND_DB.PUBLIC.SAVE_CODE_TO_STAGE(
-    FILE_NAME STRING,
-    CODE STRING
-)
-RETURNS STRING
-LANGUAGE PYTHON
-RUNTIME_VERSION = '3.10'
-PACKAGES = ('snowflake-snowpark-python')
-HANDLER = 'run'
-AS
-$$
-import io
-
-def run(session, file_name, code):
-    stage_path = "@GITTREND_DB.PUBLIC.CODE_STAGE"
-    session.file.put_stream(
-        io.BytesIO(code.encode('utf-8')),
-        f"{stage_path}/{file_name}",
-        auto_compress=False,
-        overwrite=True
-    )
-    return f"Saved {file_name} to {stage_path}"
-$$;
-
--- Step 3: Recreate GitTrend with the SaveCodeToStage tool added
-CREATE OR REPLACE AGENT GITTREND_DB.PUBLIC.GITTREND
-    COMMENT = 'GitHub trend analyst — 30 days of real star activity'
-    FROM SPECIFICATION
-$$
-models:
-  orchestration: "claude-sonnet-4-5"
-
-instructions:
-  system: >
-    You are GitTrend, a GitHub trend analyst with access to 30 days of real
-    GitHub star activity data from the GitHub Archive. You help users discover
-    trending repositories, emerging technologies, and developer community activity
-    in AI, ML, open source tooling, and software engineering.
-    Always cite which specific repositories you are drawing from when making claims.
-    When presenting results, include star counts and organization names where available.
-    When the user asks to save, export, or download generated code or a report,
-    call SaveCodeToStage with a descriptive FILE_NAME and the full content as CODE.
-  response: >
-    Be concise and data-driven. Use bullet points for lists of repositories.
-    Always mention the repo name in owner/repo format and the star count when referencing data.
-
-tools:
-  - tool_spec:
-      type: "cortex_search"
-      name: "github_repo_search"
-      description: "Search GitHub repositories by semantic meaning."
-  - tool_spec:
-      type: "generic"
-      name: "SaveCodeToStage"
-      description: >
-        Saves a code snippet, SQL query, or text to the CODE_STAGE internal stage as a file.
-        Call this whenever the user asks to save, export, or write generated code to a file.
-        Pass FILE_NAME (e.g. 'dashboard.html') and CODE (the full file contents).
-      input_schema:
-        type: "object"
-        properties:
-          FILE_NAME:
-            description: "Name of the file to create, e.g. dashboard.html"
-            type: "string"
-          CODE:
-            description: "The full code or text contents to write to the file"
-            type: "string"
-        required:
-          - FILE_NAME
-          - CODE
-
-tool_resources:
-  github_repo_search:
-    name: "GITTREND_DB.PUBLIC.GITHUB_REPO_SEARCH"
-    max_results: 10
-  SaveCodeToStage:
-    type: procedure
-    name: "GITTREND_DB.PUBLIC.SAVE_CODE_TO_STAGE(VARCHAR, VARCHAR)"
-    execution_environment:
-      warehouse: WORKSHOP_WH
-$$;
-
--- Verify
-SHOW AGENTS IN SCHEMA GITTREND_DB.PUBLIC;
