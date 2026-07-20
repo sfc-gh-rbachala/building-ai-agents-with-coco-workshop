@@ -30,7 +30,7 @@ cortex --version
 
 ### 2. Have a Snowflake account ready
 Use this event-specific link — it activates all AI features automatically:
-**[signup.snowflake.com/?t=521d04bacb9556ae0a2fcb837fbf1db2e78f9e0581a062acb9c7e4100ac1eba6](https://signup.snowflake.com/?t=521d04bacb9556ae0a2fcb837fbf1db2e78f9e0581a062acb9c7e4100ac1eba6)**
+**[signup.snowflake.com/?t=aaf6ac35aa6362f3f3a48ca28405ade45a945e7e5054586a923a4d62dfbada9d](https://signup.snowflake.com/?t=aaf6ac35aa6362f3f3a48ca28405ade45a945e7e5054586a923a4d62dfbada9d)**
 Choose **AWS US East (Ohio)** when prompted. Select **AI Data Cloud** as your use case.
 
 > If you attended the June forum, your existing trial account works fine. Skip to Step 0.
@@ -403,7 +403,7 @@ Add `SYSTEM_EXECUTE_SQL` to your MCP Server and any MCP client can run ad-hoc qu
 Same 6-step pattern. Replace GITHUB_EVENTS with your support tickets, sales pipeline, product telemetry, or internal docs. Same CoCo prompts, different schema.
 
 **Resources:**
-- [Free Snowflake trial](https://signup.snowflake.com/?t=521d04bacb9556ae0a2fcb837fbf1db2e78f9e0581a062acb9c7e4100ac1eba6)
+- [Free Snowflake trial](https://signup.snowflake.com/?t=aaf6ac35aa6362f3f3a48ca28405ade45a945e7e5054586a923a4d62dfbada9d)
 - [Snowflake-managed MCP Server docs](https://docs.snowflake.com/en/user-guide/snowflake-cortex/cortex-agents-mcp)
 - [CoCo CLI documentation](https://docs.snowflake.com/en/user-guide/cortex-code/cortex-code-snowsight)
 - [Getting Started with Cortex Agents](https://www.snowflake.com/en/developers/guides/getting-started-with-cortex-agents/)

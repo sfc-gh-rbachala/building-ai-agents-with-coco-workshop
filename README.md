@@ -30,11 +30,13 @@ Confirm the install worked: `cortex --version`
 
 Use this event-specific link — it activates all AI features automatically:
 
-**[Sign up here →](https://signup.snowflake.com/?t=521d04bacb9556ae0a2fcb837fbf1db2e78f9e0581a062acb9c7e4100ac1eba6)**
+**[Sign up here →](https://signup.snowflake.com/?t=aaf6ac35aa6362f3f3a48ca28405ade45a945e7e5054586a923a4d62dfbada9d)**
 
 Choose **AWS US East (Ohio)** when prompted. Select **AI Data Cloud** as your use case. Do not select AWS US East (N. Virginia).
 
-> If you attended the June forum, your existing trial account works. Just install the CLI.
+> **⚠️ Timing matters:** This link only activates AI features for accounts created **July 26–31, 2026 (UTC)**. Don't sign up before July 26 — you'll get a standard trial without the AI features needed for this workshop.
+
+> If you attended the June forum, your existing account is fine — just install the CoCo CLI above.
 
 ---
 
@@ -96,7 +98,7 @@ GITTREND_MCP                       →  MCP Server — exposes GitTrend to any M
 
 ## Resources
 
-- [Free Snowflake trial (event link)](https://signup.snowflake.com/?t=521d04bacb9556ae0a2fcb837fbf1db2e78f9e0581a062acb9c7e4100ac1eba6)
+- [Free Snowflake trial (event link)](https://signup.snowflake.com/?t=aaf6ac35aa6362f3f3a48ca28405ade45a945e7e5054586a923a4d62dfbada9d)
 - [Snowflake-managed MCP Server docs](https://docs.snowflake.com/en/user-guide/snowflake-cortex/cortex-agents-mcp)
 - [CoCo CLI documentation](https://docs.snowflake.com/en/user-guide/cortex-code/cortex-code-snowsight)
 - [Getting Started with Cortex Agents](https://www.snowflake.com/en/developers/guides/getting-started-with-cortex-agents/)
