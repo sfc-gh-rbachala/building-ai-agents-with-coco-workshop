@@ -412,6 +412,9 @@ Create a Semantic View on top of your data and add it as a `CORTEX_ANALYST_MESSA
 **Add MCP Connectors (outbound):**
 Your GitTrend agent can also *call out* to other MCP servers — Atlassian Jira, Salesforce, GitHub's own MCP server, or your own APIs. You built an MCP Server (inbound). MCP Connectors are the outbound direction — same protocol, opposite flow. Imagine asking GitTrend: "Open a Jira ticket for the top trending repo that we should evaluate."
 
+**Add an Agent Skill:**
+Skills are modular instruction sets (SKILL.md files) that teach your agent new behaviors without changing its core spec. Upload a SKILL.md to a Snowflake stage, attach it to your agent, and the agent follows the skill's playbook when relevant queries come in — no redeployment needed. See the [sample weekly digest skill](sample_weekly_digest_skill.md) in this repo for an example, and the [Agent Skills documentation](https://docs.snowflake.com/en/user-guide/snowflake-cortex/cortex-agents-skills) for the full guide.
+
 **Add SQL execution tool:**
 Add `SYSTEM_EXECUTE_SQL` to your MCP Server and any MCP client can run ad-hoc queries against your Snowflake account directly. Useful for power users who want raw access alongside the agent.
 
@@ -423,7 +426,7 @@ Same 6-step pattern. Replace GITHUB_EVENTS with your support tickets, sales pipe
 - [Snowflake-managed MCP Server docs](https://docs.snowflake.com/en/user-guide/snowflake-cortex/cortex-agents-mcp)
 - [CoCo CLI documentation](https://docs.snowflake.com/en/user-guide/cortex-code/cortex-code-snowsight)
 - [Getting Started with Cortex Agents](https://www.snowflake.com/en/developers/guides/getting-started-with-cortex-agents/)
-- [Getting Started with Managed Snowflake MCP Server (quickstart)](https://quickstarts.snowflake.com/)
+- [Getting Started with Managed Snowflake MCP Server (quickstart)](https://www.snowflake.com/en/developers/guides/getting-started-with-snowflake-mcp-server/)
 - [Workshop repo](https://github.com/sfc-gh-rbachala/building-ai-agents-with-coco-workshop)
 
 ---
