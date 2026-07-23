@@ -353,12 +353,23 @@ Edit `~/.cursor/mcp.json` and add:
 
 Open Cursor Settings → MCP → locate `gittrend` → click **Sign in**.
 
+**Option C — CoCo Desktop (if installed):**
+
+CoCo Desktop discovers MCP Servers in your Snowflake account automatically — no OAuth setup needed.
+
+1. Open CoCo Desktop
+2. Connect to the same Snowflake account you used for the workshop
+3. GitTrend should appear in your available tools/agents
+4. Ask it a question directly
+
+> CoCo Desktop skips the OAuth step entirely because it's already authenticated via your Snowflake connection. If you hit OAuth friction with claude.ai or Cursor, this is your fastest path to "Run It."
+
 ---
 
 ## Run It — Ask GitTrend from Your AI Tool
 **⏱ 50–65 min**
 
-Open Claude Desktop (or Cursor). You should see GitTrend in your tools list.
+Open claude.ai, Cursor, or CoCo Desktop. You should see GitTrend in your tools list.
 
 Ask it:
 
