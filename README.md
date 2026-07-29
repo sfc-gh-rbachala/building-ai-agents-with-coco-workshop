@@ -51,7 +51,7 @@ Ask it:
 - *"Is there anything blowing up around MCP or agentic AI this month?"*
 - *"Show me a bar chart of the top 10 repos by stars."*
 
-**The MCP connection to the 3:30 session:** Saurabh's MCP security workshop covers how to attack and defend MCP endpoints. This session builds the endpoint. You leave with both halves.
+**The MCP connection to the session:** 
 
 CoCo writes every SQL statement from your terminal. You direct it. You own the result.
 
