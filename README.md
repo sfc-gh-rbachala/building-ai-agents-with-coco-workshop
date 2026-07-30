@@ -44,7 +44,7 @@ Choose **AWS US East (Ohio)** when prompted. Select **AI Data Cloud For Enterpri
 
 **GitTrend v2** — a production AI agent exposed via MCP, queryable from Claude Desktop, Cursor, VS Code, or any MCP-compatible tool. Powered by 107M real GitHub events.
 
-![GitTrend answering questions in CoWork](gittrend-showcase.gif)
+![GitTrend answering questions in CoWork](media/gittrend-showcase.gif)
 
 Ask it:
 - *"What's the fastest-growing AI project in the last 30 days?"*
@@ -63,6 +63,7 @@ CoCo writes every SQL statement from your terminal. You direct it. You own the r
 |---|---|
 | [`WORKSHOP-GUIDE.md`](WORKSHOP-GUIDE.md) | Step-by-step guide — follow this during the session |
 | [`CHECKPOINTS.sql`](CHECKPOINTS.sql) | Fallback SQL for each step — use if CoCo gets stuck |
+| [`media/CoCo-Agents-TechEquity-Workshop-Deck-v2.pdf`](media/CoCo-Agents-TechEquity-Workshop-Deck-v2.pdf) | Presentation deck (V2) |
 
 ---
 
