@@ -32,10 +32,9 @@ Use this event-specific link:
 
 https://signup.snowflake.com/?t=ce05e6656e36201a16f56b4a1ae0135d4a0055666ed80498b700c4d33393e867&cloud=aws&region=us-east-2
 
-Two things to get right on the signup page:
+Good news — the link already fills in the right edition (Enterprise), cloud (AWS), and region (US East / Ohio). **Leave those as they are.** Changing the region or edition is the one thing that breaks the AI features we need. You just fill in name, work email, company, and job title.
 
-- Select **AI Data Cloud For Enterprise** from the toggle at the top
-- Choose region **AWS US East (Ohio)** — not N. Virginia
+Two small snags to expect: the cookie banner covers the Sign up button until you dismiss it, and there's a reCAPTCHA on submit.
 
 **Important:** this link only switches on the AI features we need for accounts created **August 4–9**. If you already made a Snowflake trial earlier than that, please create a fresh one with this link — an older trial will be missing what we use.
 
@@ -100,7 +99,7 @@ https://www.linkedin.com/in/richiebachala/
 
 Quick check before tonight's AI agent build at Mindspace:
 
-1. **Snowflake trial created with the event link?** (must be created Aug 4 or later, region AWS US East / Ohio, AI Data Cloud For Enterprise tier)
+1. **Snowflake trial created with the event link?** (must be created Aug 4 or later — and leave the prefilled edition and region as they are)
    https://signup.snowflake.com/?t=ce05e6656e36201a16f56b4a1ae0135d4a0055666ed80498b700c4d33393e867&cloud=aws&region=us-east-2
 
 2. **`cortex --version` prints a version number?**
@@ -156,7 +155,7 @@ Coming? Two setup steps beforehand — Snowflake trial via the event link, and `
 
 ## Send checklist
 
-- [ ] Trial link tested end-to-end from a clean browser (verify AI features actually activate)
+- [x] Trial link verified — page loads clean, Enterprise + AWS + US East (Ohio) all prefilled by the token, no toggle to click
 - [ ] Confirm ODSC hosts can send to registrants, and who is pressing send
 - [ ] Pre-workshop email sent **Aug 5**
 - [ ] Repo pushed and public before the email goes out — the email links to it
