@@ -1,9 +1,19 @@
 -- ============================================================
 -- GITTREND WORKSHOP CHECKPOINTS
--- Foundation to Intelligence Series — Level 2
--- TechEquity AI Forum | July 28, 2026
+-- Building AI Agents with Snowflake CoCo
+-- Companion to WORKSHOP-GUIDE.md
+--
 -- Use these if CoCo gets stuck or you fall behind.
 -- Run each checkpoint in a Snowflake SQL Worksheet or via snow sql.
+--
+-- Map to guide steps:
+--   SETUP         -> Step 2 (load the data)
+--   Checkpoint 1  -> Step 3a (explore schema)
+--   Checkpoint 2  -> Step 3b (V_TRENDING_AI_REPOS)
+--   Checkpoint 3  -> Step 4a (AI_COMPLETE)
+--   Checkpoint 4  -> Step 4b (Cortex Search Service)
+--   Checkpoint 5  -> Step 5a (Cortex Agent)
+--   Checkpoint 6  -> Stretch step (MCP Server + OAuth) - take-home, optional
 -- ============================================================
 
 -- SETUP (run once at the start)
@@ -220,6 +230,7 @@ SHOW AGENTS IN SCHEMA GITTREND_DB.PUBLIC;
 -- ============================================================
 -- CHECKPOINT 6 — Create the MCP Server and OAuth Integration
 -- ============================================================
+-- STRETCH / TAKE-HOME STEP — not required to finish the core build.
 -- This exposes GITTREND to Claude Desktop, Cursor, and any MCP-compatible client.
 
 -- Step 1: Create the MCP Server object

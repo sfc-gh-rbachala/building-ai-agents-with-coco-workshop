@@ -1,18 +1,31 @@
-# Building AI Agents with Snowflake CoCo — Level 2
+# Building AI Agents with Snowflake CoCo
 
-**TechEquity AI Forum — July 28, 2026 | 7:00 PM | Snowflake SVAI Hub, Menlo Park**
+Workshop materials for building a **production AI agent on 107 million real GitHub events** — with zero SQL written by hand.
 
-Workshop materials for *Foundation to Intelligence Series — Level 2: Build, Extend, and Expose a Production AI Agent*, presented by [Richie Bachala](https://www.snowflake.com/en/blog/authors/richie-bachala/), Solutions Architecture Leader at Snowflake.
-
-**Level: Intermediate / Advanced**
+Presented by [Richie Bachala](https://www.snowflake.com/en/blog/authors/richie-bachala/), Solutions Architecture Leader at Snowflake.
 
 ---
 
-## ⚠️ Pre-Work — Complete Before Arriving
+## 👉 Attending a live session?
 
-This session runs in the **CoCo CLI**, not the Snowsight UI. Two things to do before you get there:
+Start with your event page — it has the signup link, timing, and pre-work specific to your session:
 
-### 1. Install CoCo CLI
+| Event | When | Where |
+|---|---|---|
+| [**ODSC AI × Snowflake — Build an AI Agent in <60 Min**](events/odsc-2026-08-06.md) | **Aug 6, 2026, 6:00 PM PT** | Mindspace, 575 Market St, San Francisco |
+| [TechEquity AI Forum — Level 2](events/techequity-2026-07-28.md) | Jul 28, 2026 *(past)* | Snowflake SVAI Hub, Menlo Park |
+
+> **⚠️ Trial signup links are event-specific and time-boxed.** They activate the AI features this workshop needs, and only for accounts created inside a short window around the event. Always use the link on *your* event page — a generic trial won't have what you need.
+
+Working through this on your own? Grab a [free Snowflake trial](https://signup.snowflake.com/) and follow the guide — everything works, you just won't get the pre-enabled AI feature flags.
+
+---
+
+## Pre-Work
+
+### Install the CoCo CLI
+
+This workshop runs in the **CoCo CLI**, not the Snowsight UI.
 
 **macOS / Linux / WSL:**
 ```bash
@@ -24,25 +37,25 @@ curl -LsS https://ai.snowflake.com/static/cc-scripts/install.sh | sh
 irm https://ai.snowflake.com/static/cc-scripts/install.ps1 | iex
 ```
 
-Confirm the install worked: `cortex --version`
+Confirm the install: `cortex --version`
 
-### 2. Create a free Snowflake trial account
+### Get a Snowflake account
 
-Use this event-specific link — it activates all AI features automatically:
+Use the event-specific link on your event page above.
 
-**[Sign up here →](https://signup.snowflake.com/?t=aaf6ac35aa6362f3f3a48ca28405ade45a945e7e5054586a923a4d62dfbada9d&cloud=aws&region=us-east-2)**
+---
 
-Choose **AWS US East (Ohio)** when prompted. Select **AI Data Cloud For Enterprise** from the toggle at the top of the page. Do not select AWS US East (N. Virginia).
+## Why CoCo
 
-> **⚠️ Timing matters:** This link only activates AI features for accounts created **July 26–31, 2026 (UTC)**. Don't sign up before July 26 — you'll get a standard trial without the AI features needed for this workshop.
+General-purpose AI coding tools start blind to your schemas, roles, and warehouses. They burn time and tokens interrogating you before they can build anything.
 
-> **Attended the June forum?** Create a new account using the link above after July 26 — your previous trial may be near expiry and v2 requires features only available through the updated event link. Takes 2 minutes.
+CoCo starts with your data context already in hand. That's the whole difference, and you'll feel it in the first five minutes.
 
 ---
 
 ## What You'll Build
 
-**GitTrend v2** — a production AI agent exposed via MCP, queryable from Claude Desktop, Cursor, VS Code, or any MCP-compatible tool. Powered by 107M real GitHub events.
+**GitTrend** — an AI agent grounded in 107M real GitHub events.
 
 ![GitTrend answering questions in CoWork](media/gittrend-showcase.gif)
 
@@ -51,55 +64,54 @@ Ask it:
 - *"Is there anything blowing up around MCP or agentic AI this month?"*
 - *"Show me a bar chart of the top 10 repos by stars."*
 
-**The MCP connection to the session:** 
-
-CoCo writes every SQL statement from your terminal. You direct it. You own the result.
+CoCo writes every SQL statement. You direct it. You own the result.
 
 ---
 
-## Workshop Files
-
-| File | What it is |
-|---|---|
-| [`WORKSHOP-GUIDE.md`](WORKSHOP-GUIDE.md) | Step-by-step guide — follow this during the session |
-| [`CHECKPOINTS.sql`](CHECKPOINTS.sql) | Fallback SQL for each step — use if CoCo gets stuck |
-| [`media/CoCo-Agents-TechEquity-Workshop-Deck-v2.pdf`](media/CoCo-Agents-TechEquity-Workshop-Deck-v2.pdf) | Presentation deck (V2) |
-
----
-
-## The 6-Step Pattern
+## The 5-Step Pattern
 
 ```
-0. AGENTS.md + CLI    →  cortex connections create; cortex code; CoCo reads your context
-1. Load the data      →  107M GitHub events via COPY INTO from public S3
-2. CoCo explores      →  Describe schema, find the right columns
-3. Build the query    →  Trending AI repos by star activity, last 30 days (VIEW)
-4. Add AI_COMPLETE    →  Turn SQL results into natural language
-5. Wire the agent     →  Cortex Search + Cortex Agent = GitTrend
-6. Expose via MCP     →  CREATE MCP SERVER + OAuth → query from Claude Desktop / Cursor
+1. Set the context   →  AGENTS.md + cortex CLI; CoCo learns your account
+2. Load the data     →  107M GitHub events via COPY INTO from public S3
+3. Explore & build   →  CoCo reads the schema, builds V_TRENDING_AI_REPOS
+4. Add intelligence  →  AI_COMPLETE summaries + Cortex Search Service
+5. Wire the agent    →  Cortex Agent = GitTrend, ready to answer questions
 ```
 
-Same pattern works on any dataset in your organization.
+**Stretch (take-home):** expose GitTrend as an **MCP Server** and query it from Claude Desktop, Cursor, or VS Code.
+
+The same pattern works on any dataset in your organization. Swap `GITHUB_EVENTS` for your support tickets, sales pipeline, or product telemetry — same prompts, different schema.
 
 ---
 
 ## The Stack
 
 ```
-GITTREND_DB.PUBLIC.GITHUB_EVENTS  →  107M real GitHub events (S3)
-CoCo CLI                           →  writes the code (your terminal)
-V_TRENDING_AI_REPOS                →  trending AI repos by star activity
-AI_COMPLETE                        →  turns SQL results into language
-GITHUB_REPO_SEARCH                 →  Cortex Search Service (semantic index)
-GITTREND                           →  Cortex Agent (search + complete + system prompt)
-GITTREND_MCP                       →  MCP Server — exposes GitTrend to any MCP client
+GITTREND_DB.PUBLIC.GITHUB_EVENTS  →  107M real GitHub events (public S3)
+CoCo CLI                          →  writes the code (your terminal)
+V_TRENDING_AI_REPOS               →  trending AI repos by star activity
+AI_COMPLETE                       →  turns SQL results into language
+GITHUB_REPO_SEARCH                →  Cortex Search Service (semantic index)
+GITTREND                          →  Cortex Agent (search + chart + system prompt)
+GITTREND_MCP                      →  MCP Server (stretch) — exposes GitTrend anywhere
 ```
+
+---
+
+## Repo Contents
+
+| File | What it is |
+|---|---|
+| [`WORKSHOP-GUIDE.md`](WORKSHOP-GUIDE.md) | Step-by-step build guide — follow this during the session |
+| [`CHECKPOINTS.sql`](CHECKPOINTS.sql) | Fallback SQL for every step — use if CoCo gets stuck |
+| [`events/`](events/) | Per-event details: date, venue, signup link, timing |
+| [`sample_weekly_digest_skill.md`](sample_weekly_digest_skill.md) | Example Agent Skill to extend GitTrend |
+| [`media/`](media/) | Deck PDF, demo recordings, screenshots |
 
 ---
 
 ## Resources
 
-- [Free Snowflake trial (event link)](https://signup.snowflake.com/?t=aaf6ac35aa6362f3f3a48ca28405ade45a945e7e5054586a923a4d62dfbada9d&cloud=aws&region=us-east-2)
 - [Snowflake-managed MCP Server docs](https://docs.snowflake.com/en/user-guide/snowflake-cortex/cortex-agents-mcp)
 - [CoCo CLI documentation](https://docs.snowflake.com/en/user-guide/cortex-code/cortex-code-snowsight)
 - [Getting Started with Cortex Agents](https://www.snowflake.com/en/developers/guides/getting-started-with-cortex-agents/)
@@ -108,17 +120,7 @@ GITTREND_MCP                       →  MCP Server — exposes GitTrend to any M
 
 ---
 
-## Looking for the June 30 Workshop?
-
-The v1 session (*Build an AI Agent in 60 Minutes*) materials are preserved in the git history of this repo. The core build pattern is the same — v2 adds a CLI-first workflow, `auto` model selection, and MCP as a core step.
-
----
-
 ## About the Presenter
 
 **Richie Bachala** — Solutions Architecture Leader, Snowflake
-[snowflake.com/en/blog/authors/richie-bachala](https://www.snowflake.com/en/blog/authors/richie-bachala/)
-
----
-
-*TechEquity AI Forum | July 28, 2026 | Snowflake SVAI Hub, 135 Constitution Dr, Menlo Park, CA*
+[Blog](https://www.snowflake.com/en/blog/authors/richie-bachala/) · [LinkedIn](https://www.linkedin.com/in/richiebachala/)

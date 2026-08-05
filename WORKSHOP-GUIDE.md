@@ -1,80 +1,63 @@
 # Workshop Guide
-## Foundation to Intelligence Series — Level 2
-### Build, Extend, and Expose a Production AI Agent with Snowflake CoCo
-**TechEquity AI Forum — July 28, 2026 | 7:00–8:15 PM | Workshop Room**
-**Facilitated by Richie Bachala, Snowflake**
-**Level: Intermediate / Advanced**
+## Build a Production AI Agent with Snowflake CoCo
+
+**Follow this during the session.** Event-specific details — date, venue, and your trial signup link — are on your event page in [`events/`](events/).
+
+Facilitated by **Richie Bachala**, Snowflake.
 
 ---
 
-## Pre-Work — Do This Before You Arrive
+## Before You Start
 
-This session runs in the CoCo CLI, not Snowsight. Complete these two things before you get there.
+You need two things. Both are covered on your event page.
 
-### 1. Install CoCo CLI
+1. **A Snowflake trial account**, created with your **event-specific signup link**. That link activates the AI features this workshop uses, and only inside a short window around the event date. A generic trial won't work.
+2. **The CoCo CLI installed** — `cortex --version` should print a version number.
 
-**macOS / Linux / WSL:**
 ```bash
+# macOS / Linux / WSL
 curl -LsS https://ai.snowflake.com/static/cc-scripts/install.sh | sh
-```
 
-**Windows (PowerShell):**
-```powershell
+# Windows (PowerShell)
 irm https://ai.snowflake.com/static/cc-scripts/install.ps1 | iex
 ```
 
-This installs the `cortex` executable in `~/.local/bin`. Confirm it works:
-```bash
-cortex --version
-```
-
-### 2. Have a Snowflake account ready
-
-Use this event-specific link — it activates all AI features automatically:
-**[Sign up here →](https://signup.snowflake.com/?t=aaf6ac35aa6362f3f3a48ca28405ade45a945e7e5054586a923a4d62dfbada9d&cloud=aws&region=us-east-2)**
-
-Choose **AWS US East (Ohio)** when prompted. Select **AI Data Cloud For Enterprise** from the toggle at the top of the page.
-
-> **⚠️ Timing matters:** This link only activates AI features for accounts created between **July 26–31, 2026 (UTC)**. Do not sign up before July 26 — accounts created early will work as a standard trial without the AI features required for this workshop.
-
-> **Attended the June forum?** Create a new account using the link above after July 26 — your previous trial may be near expiry and v2 requires features only available through the updated event link. Takes 2 minutes.
-
 ---
 
-## Tonight's Goal
+## The Goal
 
-Build **GitTrend v2** — an MCP-connected AI agent that any tool (Claude Desktop, Cursor, VS Code) can query in plain English, powered by 107M real GitHub events.
+Build **GitTrend** — an AI agent grounded in 107M real GitHub events that answers plain-English questions about what developers are actually building.
 
-The 3:30 session covered how to attack and defend MCP endpoints. This session builds the endpoint. You leave tonight with both halves of the picture.
-
----
+You will not write SQL by hand. CoCo writes every statement; you direct it and review what it produces.
 
 ## The Stack
 
 ```
 GITTREND_DB.PUBLIC.GITHUB_EVENTS  →  107M real GitHub events (from S3)
-CoCo CLI                           →  writes the code (your terminal, not Snowsight)
-V_TRENDING_AI_REPOS                →  trending AI repos by star activity
-AI_COMPLETE                        →  turns SQL results into language
-GITHUB_REPO_SEARCH                 →  Cortex Search Service (semantic index)
-GITTREND                           →  Cortex Agent (search + complete + system prompt)
-GITTREND_MCP                       →  MCP Server (exposes GitTrend to any MCP client)
+CoCo CLI                          →  writes the code (your terminal, not Snowsight)
+V_TRENDING_AI_REPOS               →  trending AI repos by star activity
+AI_COMPLETE                       →  turns SQL results into language
+GITHUB_REPO_SEARCH                →  Cortex Search Service (semantic index)
+GITTREND                          →  Cortex Agent (search + chart + system prompt)
 ```
+
+> **Stuck at any point?** [`CHECKPOINTS.sql`](CHECKPOINTS.sql) has the fallback SQL for every step. Paste it into a Snowsight worksheet and you'll land in the same place. Falling back is not failing — it keeps you with the group.
 
 ---
 
-## Step 0 — AGENTS.md + CLI Connection
-**⏱ First 10 minutes**
+# Step 1 — Set the Context
 
-This is the foundation. Do this before anything else.
+**⏱ ~10 min**
 
-### 1. Create your project folder and AGENTS.md
+This is the foundation. Do it before anything else.
+
+### 1a. Create your project folder and `AGENTS.md`
 
 ```bash
 mkdir gittrend-workshop && cd gittrend-workshop
 ```
 
-Create a file called `AGENTS.md` in this folder with your account details:
+Create a file called `AGENTS.md` in that folder:
 
 ```markdown
 # AGENTS.md
@@ -90,36 +73,37 @@ Always use fully qualified object names (DB.SCHEMA.OBJECT).
 Source data is read-only: GITTREND_DB.PUBLIC.GITHUB_EVENTS
 ```
 
-> **Why AGENTS.md matters:** CoCo reads this file at the start of every session. It knows your account, your warehouse, your constraints — without you re-explaining it every time. Under 200 lines keeps compliance near 100%. This file is the reason tonight's workflow is faster than anything you've seen in Snowsight.
+> **Why `AGENTS.md` matters:** CoCo reads this file at the start of every session. It knows your account, your warehouse, and your constraints without you re-explaining them. Keeping it under 200 lines holds compliance near 100%. This file is the reason this workflow moves faster than clicking through a UI — and it's the single most transferable thing you'll take home tonight.
 
-### 2. Connect to Snowflake and start CoCo
+### 1b. Connect to Snowflake and start CoCo
 
-From inside the `gittrend-workshop/` folder, run:
+From inside `gittrend-workshop/`:
 
 ```bash
 cortex
 ```
 
-On first launch, a setup wizard guides you through creating a Snowflake connection — enter your account identifier, username, and password when prompted.
+On first launch a setup wizard walks you through creating a Snowflake connection — enter your account identifier, username, and password.
 
-> **Account identifier format:** `orgname-accountname` (find it in Admin → Accounts in Snowsight). For trial accounts, typically `your-org-name-<random>`.
+> **Account identifier format:** `orgname-accountname`. Find it in Snowsight under Admin → Accounts.
 
-> **Already have a Snowflake CLI connection?** CoCo shares the same `~/.snowflake/connections.toml`. It will list your existing connections — just select one.
+> **Already have a Snowflake CLI connection?** CoCo shares the same `~/.snowflake/connections.toml`. It will list your existing connections — just pick one.
 
-Once connected, CoCo starts and automatically loads your `AGENTS.md`. You'll see a confirmation in the session header.
+Once connected, CoCo loads your `AGENTS.md` automatically. You'll see it confirmed in the session header.
 
-> **For live demos or exploring production data:** relaunch with `cortex --sql-read-only` to prevent accidental writes. Toggle mid-session with `/sql-writes off`.
+**Checkpoint:** CoCo is running and the session header shows `AGENTS.md` loaded.
 
-> **If your session context gets long:** type `/compact` to summarize the conversation and free up context without losing your place.
+> **`AGENTS.md` not loaded?** You ran `cortex` from the wrong directory. It has to be the folder holding the file.
 
-> **AGENTS.md not loaded?** Make sure you ran `cortex` from the `gittrend-workshop/` directory where the file lives.
+> **Useful mid-session:** `/compact` summarizes a long conversation to free up context. `cortex --sql-read-only` (or `/sql-writes off`) prevents accidental writes — worth knowing before you point CoCo at anything real.
 
 ---
 
-## Step 1 — Load the Data
-**⏱ 5 min (fires in background)**
+# Step 2 — Load the Data
 
-In your CoCo terminal, paste this prompt:
+**⏱ ~5 min, and it runs in the background**
+
+Paste this prompt into CoCo:
 
 ```
 Run the following setup SQL in my Snowflake account:
@@ -138,20 +122,19 @@ Run the following setup SQL in my Snowflake account:
 - Run SELECT COUNT(*) to verify (~107M rows expected)
 ```
 
-CoCo writes and runs the setup SQL. **This takes ~4 minutes.** Move to the next slides immediately — it runs in the background.
+CoCo writes and runs the setup SQL. **The load takes about 4 minutes.** Don't sit and watch it — move straight to Step 3. The load runs server-side inside Snowflake.
 
-> **If CoCo needs confirmation at each step,** use `CHECKPOINTS.sql` → SETUP block and run it in a Snowsight worksheet in parallel. Both paths get you to the same result.
+**Checkpoint:** `SELECT COUNT(*) FROM GITTREND_DB.PUBLIC.GITHUB_EVENTS` returns ~107,752,158 rows.
 
-> **Verify:** `SELECT COUNT(*) FROM GITTREND_DB.PUBLIC.GITHUB_EVENTS` should return ~107,752,158 rows.
+> **CoCo asking for confirmation at every statement?** Run the SETUP block from [`CHECKPOINTS.sql`](CHECKPOINTS.sql) in a Snowsight worksheet in parallel. Same result, less friction.
 
 ---
 
-## Step 2 — Build the GitTrend Agent
-**⏱ 15–30 min**
+# Step 3 — Explore and Build
 
-This is a compressed version of the v1 workshop. Intermediate audience: move fast through these. If you built GitTrend in June, this is a 10-minute refresh. If you're new, follow every step — the prompts are self-explanatory.
+**⏱ ~15 min**
 
-### 2a — CoCo explores the schema
+### 3a. Let CoCo read the schema
 
 ```
 I have a table called GITTREND_DB.PUBLIC.GITHUB_EVENTS loaded from the GitHub Archive.
@@ -160,10 +143,13 @@ Tell me which columns would be most useful for finding trending AI and ML reposi
 by star activity.
 ```
 
-**Checkpoint:** CoCo identifies `WatchEvent` = a repo star, recommends `REPO_NAME`, `CREATED_AT`, `EVENT_TYPE`.
-> Stuck? → `CHECKPOINTS.sql` → Checkpoint 1
+**Checkpoint:** CoCo works out that `WatchEvent` means "a repo was starred," and points you at `REPO_NAME`, `CREATED_AT`, and `EVENT_TYPE`.
 
-### 2b — Build the trending repos view
+That inference is the point. Nothing in the schema says "star." CoCo read the data and figured it out.
+
+> Stuck? → [`CHECKPOINTS.sql`](CHECKPOINTS.sql) → Checkpoint 1
+
+### 3b. Build the trending repos view
 
 ```
 Using GITTREND_DB.PUBLIC.GITHUB_EVENTS:
@@ -180,11 +166,17 @@ Only include repos with 10 or more stars gained.
 Then query the view to show the top 20 repos by stars gained, descending.
 ```
 
-**The moment:** Call out the project at the top of your list. That's 107M GitHub events surfacing what the developer community was actually building — real signal from the archive, not a model's training memory.
+**The moment:** look at what's at the top of your list. That's 107M real GitHub events surfacing what the developer community was actually building — signal from the archive, not a model's training memory.
 
-> Stuck? → `CHECKPOINTS.sql` → Checkpoint 2
+> Stuck? → [`CHECKPOINTS.sql`](CHECKPOINTS.sql) → Checkpoint 2
 
-### 2c — Add AI_COMPLETE
+---
+
+# Step 4 — Add Intelligence
+
+**⏱ ~10 min**
+
+### 4a. Wrap the results in `AI_COMPLETE`
 
 ```
 Take the view we just created. Wrap the results in a call to AI_COMPLETE so
@@ -198,12 +190,13 @@ The summary should:
 Use the 'claude-sonnet-4-6' model.
 ```
 
-> **Note:** Use `AI_COMPLETE`, not `CORTEX.COMPLETE`. `CORTEX.COMPLETE` is deprecated and being retired in 2026. `AI_COMPLETE` is the canonical function going forward.
+**Checkpoint:** the query returns a paragraph, not rows.
 
-**Checkpoint:** Running the query returns a paragraph, not rows.
-> Stuck? → `CHECKPOINTS.sql` → Checkpoint 3
+> **Use `AI_COMPLETE`, not `CORTEX.COMPLETE`.** `CORTEX.COMPLETE` is deprecated and being retired in 2026. `AI_COMPLETE` is the function going forward.
 
-### 2d — Create Cortex Search Service
+> Stuck? → [`CHECKPOINTS.sql`](CHECKPOINTS.sql) → Checkpoint 3
+
+### 4b. Create the Cortex Search Service
 
 ```
 Create a Cortex Search Service called GITTREND_DB.PUBLIC.GITHUB_REPO_SEARCH
@@ -213,12 +206,19 @@ Search on the description column. Include repo_name and stars_gained as attribut
 Use WORKSHOP_WH and a target lag of 1 hour.
 ```
 
-Runs in ~30 seconds. Fire and move to 2e immediately — they overlap.
+Takes about 30 seconds. Fire it and move to Step 5 — they overlap.
 
 **Checkpoint:** `SHOW CORTEX SEARCH SERVICES IN SCHEMA GITTREND_DB.PUBLIC` returns `GITHUB_REPO_SEARCH` with status `ACTIVE`.
-> Stuck? → `CHECKPOINTS.sql` → Checkpoint 4
 
-### 2e — Create the Cortex Agent
+> Stuck? → [`CHECKPOINTS.sql`](CHECKPOINTS.sql) → Checkpoint 4
+
+---
+
+# Step 5 — Wire the Agent
+
+**⏱ ~15 min**
+
+### 5a. Create the Cortex Agent
 
 ```
 Create a Cortex Agent called GITTREND_DB.PUBLIC.GITTREND that:
@@ -240,22 +240,67 @@ Create a Cortex Agent called GITTREND_DB.PUBLIC.GITTREND that:
 Create it in GITTREND_DB.PUBLIC.
 ```
 
-> **Note on model selection:** Use `auto` instead of a specific model name. Snowflake picks the highest-quality model available for your account and region, and it improves automatically as new models ship. You never need to update your agent config when a better model is released.
+> **On model selection:** use `auto`, not a specific model name. Snowflake picks the best model available for your account and region, and it improves as new models ship. You never have to update the agent config when something better lands.
 
 **Checkpoint:** `SHOW AGENTS IN SCHEMA GITTREND_DB.PUBLIC` returns `GITTREND`.
-> Stuck? → `CHECKPOINTS.sql` → Checkpoint 5
+
+> Stuck? → [`CHECKPOINTS.sql`](CHECKPOINTS.sql) → Checkpoint 5
+
+### 5b. Run it
+
+Open GitTrend in Snowflake CoWork:
+
+**Left nav → AI & ML → Agents → `GITTREND` → Preview in Snowflake CoWork**
+
+Ask it:
+
+> *"What's the fastest-growing AI project in the last 30 days?"*
+
+Wait for the answer. That answer is grounded in 107M real GitHub events, in an account that was empty when you sat down.
+
+Keep going — notice it holds context across turns, so you don't have to re-explain the previous question:
+
+```
+What programming languages dominate trending AI repos right now?
+
+Is there anything blowing up around MCP or agentic AI this month?
+
+Compare the top 5 repos — what do they have in common?
+
+Are there any surprise breakouts — repos nobody knows yet but are gaining fast?
+
+Show me a bar chart of the top 10 repos by stars gained.
+```
+
+> **That last one triggers Data to Chart.** GitTrend renders a visualization inline. That's the `data_to_chart` tool you added in 5a — the agent decided on its own when to use it.
+
+> **The memory across turns** is Cortex Agent Threads. The agent keeps conversation context, so follow-ups work naturally.
 
 ---
 
-## Step 3 — Wire the MCP Server
-**⏱ 30–50 min**
+## What You Built
+
+```
+GITTREND_DB.PUBLIC.GITHUB_EVENTS  —  107M real GitHub events loaded from S3
+V_TRENDING_AI_REPOS               —  trending AI repo view by star activity
+GITHUB_REPO_SEARCH                —  Cortex Search index
+GITTREND                          —  Cortex Agent: search + chart + system prompt
+```
+
+CoCo wrote every SQL statement. You directed it.
+
+**Now do it on your own data.** Replace `GITHUB_EVENTS` with your support tickets, sales pipeline, product telemetry, or internal docs. Same five steps, same prompts, different schema. That's the part worth taking to work on Monday.
+
+---
+
+# Stretch Step — Expose GitTrend via MCP
+
+**Take-home.** Your trial account stays active after the session, so you can finish this at home.
 
 > **What's the Snowflake-managed MCP Server?**
-> An MCP (Model Context Protocol) Server is a Snowflake object that exposes your agents, search services, and analysts to any MCP-compatible client — Claude Desktop, Cursor, VS Code, or your own app. No separate infrastructure. No Docker. Just a DDL object and a URL. You create it; clients connect to it and discover your tools automatically.
+> An MCP (Model Context Protocol) Server is a Snowflake object that exposes your agents, search services, and analysts to any MCP-compatible client — Claude Desktop, Cursor, VS Code, or your own app. No separate infrastructure, no Docker. A DDL object and a URL. You create it; clients connect and discover your tools automatically.
 
-This is the new step for v2. Two substeps: create the MCP Server object, then configure OAuth so clients can authenticate.
-
-### 3a — Create the MCP Server
+### S1 — Create the MCP Server
 
 ```
 Create an MCP Server called GITTREND_DB.PUBLIC.GITTREND_MCP that exposes
@@ -286,11 +331,11 @@ CREATE OR REPLACE MCP SERVER GITTREND_DB.PUBLIC.GITTREND_MCP
 
 Verify: `SHOW MCP SERVERS IN SCHEMA GITTREND_DB.PUBLIC;`
 
-> Stuck? → `CHECKPOINTS.sql` → Checkpoint 6
+> Stuck? → [`CHECKPOINTS.sql`](CHECKPOINTS.sql) → Checkpoint 6
 
-### 3b — Set up OAuth
+### S2 — Set up OAuth
 
-MCP clients authenticate via OAuth. The redirect URI below is for **claude.ai (web)**. If using Claude Desktop app or Cursor, use the redirect URI shown during their OAuth setup flow instead.
+MCP clients authenticate via OAuth. The redirect URI below is for **claude.ai (web)**. Claude Desktop and Cursor each show their own redirect URI during setup — use theirs instead.
 
 ```sql
 CREATE OR REPLACE SECURITY INTEGRATION GITTREND_MCP_OAUTH
@@ -306,37 +351,30 @@ Get your client ID and secret:
 SELECT SYSTEM$SHOW_OAUTH_CLIENT_SECRETS('GITTREND_MCP_OAUTH');
 ```
 
-> Save the `OAUTH_CLIENT_ID` and `OAUTH_CLIENT_SECRET` — you'll need them in Step 3c.
+Save the `OAUTH_CLIENT_ID` and `OAUTH_CLIENT_SECRET` — you need them in S3.
 
-Set your user's default role and warehouse (required for MCP OAuth sessions):
+MCP OAuth sessions require a default role and warehouse on your user:
 ```sql
 SET MY_USER = CURRENT_USER();
 ALTER USER IDENTIFIER($MY_USER) SET DEFAULT_ROLE = 'ACCOUNTADMIN' DEFAULT_WAREHOUSE = 'WORKSHOP_WH';
 ```
 
-> Stuck? → `CHECKPOINTS.sql` → Checkpoint 6 (OAuth block)
+### S3 — Connect a client
 
-### 3c — Connect from Claude Desktop or Cursor
-
-Your MCP Server URL is:
+Your MCP Server URL:
 ```
 https://<your-account-url>/api/v2/databases/GITTREND_DB/schemas/PUBLIC/mcp-servers/GITTREND_MCP
 ```
 
-> **Important:** Replace any underscores (`_`) in your account URL hostname with hyphens (`-`). Some MCP clients have issues with underscores. For example: `myorg-myaccount.snowflakecomputing.com` — keep hyphens, don't add extra.
+**Easiest path — CoCo Desktop.** It discovers MCP Servers in your account automatically and skips OAuth entirely, because it's already authenticated through your Snowflake connection. Open CoCo Desktop, connect to the same account, and GitTrend appears in your tools.
 
-**Option A — claude.ai (web):**
-1. Go to claude.ai → Settings → Connectors
-2. Click **Add custom connector**
-3. Name: `GitTrend` | URL: your MCP Server URL above
-4. Enter the client ID and secret from 3b
-5. Click Add → authenticate in the browser popup
+**claude.ai (web):**
+1. claude.ai → Settings → Connectors → **Add custom connector**
+2. Name: `GitTrend` | URL: your MCP Server URL
+3. Enter the client ID and secret from S2
+4. Add → authenticate in the browser popup
 
-> **Using Claude Desktop (the app)?** Claude Desktop uses a different OAuth redirect URI — use the localhost URI shown when you set up the connector in Desktop, not `claude.ai/api/mcp/auth_callback`. Update the `OAUTH_REDIRECT_URI` in step 3b accordingly.
-
-**Option B — Cursor (`mcp.json`):**
-
-Edit `~/.cursor/mcp.json` and add:
+**Cursor** — edit `~/.cursor/mcp.json`:
 ```json
 {
   "mcpServers": {
@@ -350,97 +388,28 @@ Edit `~/.cursor/mcp.json` and add:
   }
 }
 ```
+Then Cursor Settings → MCP → `gittrend` → **Sign in**.
 
-Open Cursor Settings → MCP → locate `gittrend` → click **Sign in**.
-
-**Option C — CoCo Desktop (if installed):**
-
-CoCo Desktop discovers MCP Servers in your Snowflake account automatically — no OAuth setup needed.
-
-1. Open CoCo Desktop
-2. Connect to the same Snowflake account you used for the workshop
-3. GitTrend should appear in your available tools/agents
-4. Ask it a question directly
-
-> CoCo Desktop skips the OAuth step entirely because it's already authenticated via your Snowflake connection. If you hit OAuth friction with claude.ai or Cursor, this is your fastest path to "Run It."
-
----
-
-## Run It — Ask GitTrend from Your AI Tool
-**⏱ 50–65 min**
-
-Open claude.ai, Cursor, or CoCo Desktop. You should see GitTrend in your tools list.
-
-Ask it:
-
-> *"What's the fastest-growing AI project in the last 30 days?"*
-
-Wait. Let the answer come back.
-
-That answer is grounded in 107M real GitHub events. You built the agent. You exposed the endpoint. The 3:30 session showed you how to lock the door. Now you've built what goes behind it.
-
-Try a few more — and notice that GitTrend remembers context across turns. You don't re-explain the prior question:
-```
-What programming languages dominate trending AI repos right now?
-
-Is there anything blowing up around MCP or agentic AI this month?
-
-Compare the top 5 repos — what do they have in common?
-
-Are there any surprise breakouts — repos nobody knows yet but are gaining fast?
-
-Show me a bar chart of the top 10 repos by stars gained.
-```
-
-> **That last one triggers Data to Chart.** GitTrend will generate a visualization inline. This is the `data_to_chart` tool you added in Step 2e — the agent decided on its own when to use it.
-
-> **The memory across turns** is Cortex Agents Threads — the agent maintains conversation context so follow-up questions work naturally, without you re-explaining context each time.
-
-**Fallback — CoWork:**
-If MCP client setup isn't complete, open GitTrend in CoWork:
-Left nav → AI & ML → Agents → GITTREND → Preview in Snowflake CoWork
-
----
-
-## What You Built
-
-```
-GITTREND_DB.PUBLIC.GITHUB_EVENTS  —  107M real GitHub events loaded from S3
-V_TRENDING_AI_REPOS               —  Trending AI repo view by star activity
-GITHUB_REPO_SEARCH                —  Cortex Search index on repo names
-GITTREND                          —  Cortex Agent: search + AI_COMPLETE + system prompt
-GITTREND_MCP                      —  MCP Server: exposes GitTrend to any MCP client
-```
-
-CoCo wrote every SQL statement. You directed it.
+Now ask GitTrend the same questions from inside your editor. Same agent, different front door.
 
 ---
 
 ## Take It Further
 
-**Add Cortex Analyst via Semantic View:**
-Create a Semantic View on top of your data and add it as a `CORTEX_ANALYST_MESSAGE` tool to the MCP Server. Now your MCP clients can ask structured analytical questions ("show me a chart of star velocity by week") alongside the conversational search. Agents now generate SQL directly from semantic views — faster and more accurate than the prior two-step approach.
+**Add Cortex Analyst via a Semantic View.** Build a Semantic View over your data and add it as a `CORTEX_ANALYST_MESSAGE` tool. Your clients can then ask structured analytical questions alongside conversational search. Agents generate SQL directly from semantic views — faster and more accurate than the older two-step approach.
 
-**Add MCP Connectors (outbound):**
-Your GitTrend agent can also *call out* to other MCP servers — Atlassian Jira, Salesforce, GitHub's own MCP server, or your own APIs. You built an MCP Server (inbound). MCP Connectors are the outbound direction — same protocol, opposite flow. Imagine asking GitTrend: "Open a Jira ticket for the top trending repo that we should evaluate."
+**Add MCP Connectors (outbound).** You built an MCP Server, which is inbound. MCP Connectors are the opposite direction — your agent calling *out* to Jira, Salesforce, GitHub's own MCP server, or your APIs. Same protocol, opposite flow. Picture asking GitTrend: *"Open a Jira ticket for the top trending repo we should evaluate."*
 
-**Add an Agent Skill:**
-Skills are modular instruction sets (SKILL.md files) that teach your agent new behaviors without changing its core spec. Upload a SKILL.md to a Snowflake stage, attach it to your agent, and the agent follows the skill's playbook when relevant queries come in — no redeployment needed. See the [sample weekly digest skill](sample_weekly_digest_skill.md) in this repo for an example, and the [Agent Skills documentation](https://docs.snowflake.com/en/user-guide/snowflake-cortex/cortex-agents-skills) for the full guide.
+**Add an Agent Skill.** Skills are modular instruction sets (`SKILL.md` files) that teach your agent new behaviors without touching its core spec. Upload one to a stage, attach it, and the agent follows that playbook when relevant questions come in — no redeployment. See [`sample_weekly_digest_skill.md`](sample_weekly_digest_skill.md) and the [Agent Skills docs](https://docs.snowflake.com/en/user-guide/snowflake-cortex/cortex-agents-skills).
 
-**Add SQL execution tool:**
-Add `SYSTEM_EXECUTE_SQL` to your MCP Server and any MCP client can run ad-hoc queries against your Snowflake account directly. Useful for power users who want raw access alongside the agent.
-
-**Adapt to your own data:**
-Same 6-step pattern. Replace GITHUB_EVENTS with your support tickets, sales pipeline, product telemetry, or internal docs. Same CoCo prompts, different schema.
-
-**Resources:**
-- [Free Snowflake trial](https://signup.snowflake.com/?t=aaf6ac35aa6362f3f3a48ca28405ade45a945e7e5054586a923a4d62dfbada9d&cloud=aws&region=us-east-2)
-- [Snowflake-managed MCP Server docs](https://docs.snowflake.com/en/user-guide/snowflake-cortex/cortex-agents-mcp)
-- [CoCo CLI documentation](https://docs.snowflake.com/en/user-guide/cortex-code/cortex-code-snowsight)
-- [Getting Started with Cortex Agents](https://www.snowflake.com/en/developers/guides/getting-started-with-cortex-agents/)
-- [Getting Started with Managed Snowflake MCP Server (quickstart)](https://www.snowflake.com/en/developers/guides/getting-started-with-snowflake-mcp-server/)
-- [Workshop repo](https://github.com/sfc-gh-rbachala/building-ai-agents-with-coco-workshop)
+**Add a SQL execution tool.** Add `SYSTEM_EXECUTE_SQL` to your MCP Server and any client can run ad-hoc queries against your account. Useful for power users who want raw access next to the agent.
 
 ---
 
-*Built at TechEquity AI Forum | July 28, 2026 | Snowflake SVAI Hub, Menlo Park*
+## Resources
+
+- [Snowflake-managed MCP Server docs](https://docs.snowflake.com/en/user-guide/snowflake-cortex/cortex-agents-mcp)
+- [CoCo CLI documentation](https://docs.snowflake.com/en/user-guide/cortex-code/cortex-code-snowsight)
+- [Getting Started with Cortex Agents](https://www.snowflake.com/en/developers/guides/getting-started-with-cortex-agents/)
+- [Getting Started with the Snowflake MCP Server](https://www.snowflake.com/en/developers/guides/getting-started-with-snowflake-mcp-server/)
+- [Workshop repo](https://github.com/sfc-gh-rbachala/building-ai-agents-with-coco-workshop)
