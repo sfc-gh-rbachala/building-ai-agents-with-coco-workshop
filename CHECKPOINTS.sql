@@ -241,7 +241,8 @@ $$;
 -- Verify
 SHOW AGENTS IN SCHEMA GITTREND_DB.PUBLIC;
 
--- To test in CoWork: left nav → AI & ML → Agents → GITTREND → Preview in Snowflake CoWork
+-- To test in CoWork: left nav → AI & ML → Agents → GITTREND → Preview → Preview in Snowflake CoWork
+-- (two clicks after selecting the agent, not one)
 
 
 -- ============================================================
