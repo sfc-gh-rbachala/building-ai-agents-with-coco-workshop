@@ -73,7 +73,7 @@ Always use fully qualified object names (DB.SCHEMA.OBJECT).
 Source data is read-only: GITTREND_DB.PUBLIC.GITHUB_EVENTS
 ```
 
-> **Why `AGENTS.md` matters:** CoCo reads this file at the start of every session. It knows your account, your warehouse, and your constraints without you re-explaining them. Keeping it under 200 lines holds compliance near 100%. This file is the reason this workflow moves faster than clicking through a UI — and it's the single most transferable thing you'll take home tonight.
+> **Why `AGENTS.md` matters:** CoCo reads this file at the start of every session. It knows your account, your warehouse, and your constraints without you re-explaining them. Keeping it under 200 lines holds compliance near 100%. This file is the reason this workflow moves faster than clicking through a UI — and it's the single most transferable thing you'll take home from this session.
 
 ### 1b. Connect to Snowflake and start CoCo
 
@@ -160,7 +160,8 @@ goes through June 18, 2026 — use that as the end of the 30-day window, not
 CURRENT_TIMESTAMP.
 
 Where the repo name suggests AI, ML, LLM, GPT, agent, MCP, or open source (names containing "open").
-Include: repo name as both repo_name and description, stars gained, first and last star timestamps.
+Include exactly these columns, with these names: repo_name, description (use the
+repo name for this too), stars_gained, first_star_at, last_star_at.
 Only include repos with 10 or more stars gained.
 
 Then query the view to show the top 20 repos by stars gained, descending.
@@ -203,8 +204,10 @@ Create a Cortex Search Service called GITTREND_DB.PUBLIC.GITHUB_REPO_SEARCH
 using the V_TRENDING_AI_REPOS view we just created.
 
 Search on the description column. Include repo_name and stars_gained as attributes.
-Use WORKSHOP_WH and a target lag of 1 hour.
+Use WORKSHOP_WH, a target lag of 1 hour, and REFRESH_MODE = FULL.
 ```
+
+> **Why `REFRESH_MODE = FULL`:** the default is `INCREMENTAL`, and service creation *fails outright* if Snowflake can't incrementalize the source query. Our source is an aggregate view over 107M rows — the shape most likely to be rejected. The data is static, so incremental refresh gains us nothing.
 
 Takes about 30 seconds. Fire it and move to Step 5 — they overlap.
 
@@ -229,7 +232,9 @@ Create a Cortex Agent called GITTREND_DB.PUBLIC.GITTREND that:
 3. Includes a data_to_chart tool so it can generate visualizations
 4. Has a system prompt that tells it:
    - It is GitTrend, a GitHub trend analyst
-   - It has access to 30 days of real GitHub star data
+   - Its data covers GitHub star activity from May 19 to June 18, 2026, and does
+     not update. When someone says "last 30 days" or "this month", it should
+     interpret that as this fixed window and say so in its answer
    - It should answer questions about trending repos, emerging technologies,
      and developer community activity
    - It should always cite the specific repos it's drawing from
@@ -257,6 +262,8 @@ Ask it:
 > *"What's the fastest-growing AI project in the last 30 days?"*
 
 Wait for the answer. That answer is grounded in 107M real GitHub events, in an account that was empty when you sat down.
+
+> **Note on the data window:** the archive snapshot runs May 19 – June 18, 2026, so "last 30 days" means that window, not today. You told the agent this in 5a, so it should say so itself. Worth knowing before you ask it what's trending "this month."
 
 Keep going — notice it holds context across turns, so you don't have to re-explain the previous question:
 
@@ -351,7 +358,7 @@ Get your client ID and secret:
 SELECT SYSTEM$SHOW_OAUTH_CLIENT_SECRETS('GITTREND_MCP_OAUTH');
 ```
 
-Save the `OAUTH_CLIENT_ID` and `OAUTH_CLIENT_SECRET` — you need them in S3.
+Save the `OAUTH_CLIENT_ID` and `OAUTH_CLIENT_SECRET` — you need them when you connect a client below.
 
 MCP OAuth sessions require a default role and warehouse on your user:
 ```sql
@@ -365,6 +372,8 @@ Your MCP Server URL:
 ```
 https://<your-account-url>/api/v2/databases/GITTREND_DB/schemas/PUBLIC/mcp-servers/GITTREND_MCP
 ```
+
+> **Finding your account URL:** it's `https://<orgname>-<accountname>.snowflakecomputing.com`, from Admin → Accounts in Snowsight. Use **hyphens** in the hostname, never underscores — underscores cause MCP connection failures in several clients.
 
 **Easiest path — CoCo Desktop.** It discovers MCP Servers in your account automatically and skips OAuth entirely, because it's already authenticated through your Snowflake connection. Open CoCo Desktop, connect to the same account, and GitTrend appears in your tools.
 

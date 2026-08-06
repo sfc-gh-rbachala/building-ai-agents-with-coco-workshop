@@ -12,7 +12,7 @@ Copy-paste ready. Three assets:
 
 ## 1. Pre-Workshop Email — send Wed Aug 5
 
-**Send via:** Luma event page → Guests → Email attendees (ODSC hosts: Elen G, Paula Micetic, Julia Voichuk, Ira Pidkovych)
+**Send via:** Luma event page → Guests → Email attendees (the ODSC event hosts own the registrant list)
 
 **Subject:** `5 minutes of prep for tomorrow's AI agent build (please do this tonight)`
 
@@ -91,32 +91,64 @@ https://www.linkedin.com/in/richiebachala/
 
 ---
 
-## 2. Day-Of Reminder — morning of Aug 6 (optional)
+## 2. Day-Of Reminder — morning of Aug 6
 
-**Subject:** `Tonight, 6:30 PM — quick setup check`
+**Subject:** `Tonight 6:30 — 5 min of setup if you haven't done it yet`
+
+**Preview text:** `Trial account + CLI install. Do it on your commute.`
 
 ---
 
-Quick check before tonight's AI agent build at Mindspace:
+Hi —
 
-1. **Snowflake trial created with the event link?** (must be created Aug 4 or later — and leave the prefilled edition and region as they are)
-   https://signup.snowflake.com/?t=ce05e6656e36201a16f56b4a1ae0135d4a0055666ed80498b700c4d33393e867&cloud=aws&region=us-east-2
+Tonight's the AI agent build at Mindspace. **Doors and food at 6:00, workshop starts 6:30 sharp.**
 
-2. **`cortex --version` prints a version number?**
-   Install: `curl -LsS https://ai.snowflake.com/static/cc-scripts/install.sh | sh`
-   (Windows: `irm https://ai.snowflake.com/static/cc-scripts/install.ps1 | iex`)
+If you already did the two setup steps, you're good — see you there.
 
-3. **Laptop and charger packed?**
+If you haven't, please do them before you arrive. It's five minutes, and it's the difference between building alongside everyone else and watching an installer bar for the first twenty.
 
-Not done yet? Do it on the train — takes five minutes and means you're building at 6:30 instead of installing.
+**1. Snowflake trial account**
 
-Doors and food at 6:00. Workshop starts 6:30 sharp.
-575 Market St, SF.
+https://signup.snowflake.com/?t=ce05e6656e36201a16f56b4a1ae0135d4a0055666ed80498b700c4d33393e867&cloud=aws&region=us-east-2
 
-Guide and fallback SQL: https://github.com/sfc-gh-rbachala/building-ai-agents-with-coco-workshop
+The link already fills in the correct edition, cloud, and region. **Leave those exactly as they are** — changing the region is the one thing that will stop the workshop working for you. Just add your name, email, company, and title.
+
+Two snags to expect: the cookie banner covers the Sign up button until you dismiss it, and there's a reCAPTCHA on submit.
+
+If you made a Snowflake trial before this week, make a fresh one with this link. An older account won't have the features we use.
+
+**2. CoCo CLI**
+
+macOS / Linux / WSL:
+```
+curl -LsS https://ai.snowflake.com/static/cc-scripts/install.sh | sh
+```
+
+Windows (PowerShell):
+```
+irm https://ai.snowflake.com/static/cc-scripts/install.ps1 | iex
+```
+
+You're ready when this prints a version number:
+```
+cortex --version
+```
+
+**Tonight**
+
+- **Bring your laptop and charger.** This is hands-on, not a watch-along.
+- Wi-Fi will be shared by around 100 people — a phone hotspot is a smart backup. The heavy lifting happens inside Snowflake, so your laptop is mostly just sending prompts.
+- Arrive at 6:00 if you can. I'll be circulating during the food block to help anyone stuck on setup.
+
+Guide and fallback SQL for every step, in case you fall behind at any point:
+https://github.com/sfc-gh-rbachala/building-ai-agents-with-coco-workshop
+
+**Mindspace, 575 Market St, San Francisco**
 
 See you tonight,
-Richie
+
+**Richie Bachala**
+Solutions Architecture Leader, Snowflake
 
 ---
 
@@ -153,11 +185,4 @@ Coming? Two setup steps beforehand — Snowflake trial via the event link, and `
 
 ---
 
-## Send checklist
-
-- [x] Trial link verified — page loads clean, Enterprise + AWS + US East (Ohio) all prefilled by the token, no toggle to click
-- [ ] Confirm ODSC hosts can send to registrants, and who is pressing send
-- [ ] Pre-workshop email sent **Aug 5**
-- [ ] Repo pushed and public before the email goes out — the email links to it
-- [ ] LinkedIn post live Aug 5
-- [ ] Day-of reminder queued for the morning of Aug 6
+*Run-of-show and send tracking are kept outside this repo.*

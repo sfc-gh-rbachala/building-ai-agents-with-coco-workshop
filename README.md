@@ -12,12 +12,12 @@ Start with your event page — it has the signup link, timing, and pre-work spec
 
 | Event | When | Where |
 |---|---|---|
-| [**ODSC AI × Snowflake — Build an AI Agent in <60 Min**](events/odsc-2026-08-06.md) | **Aug 6, 2026, 6:00 PM PT** | Mindspace, 575 Market St, San Francisco |
+| [**ODSC AI × Snowflake — Build an AI Agent in <60 Min**](events/odsc-2026-08-06.md) | **Aug 6, 2026 — doors 6:00 PM, build 6:30 PM PT** | Mindspace, 575 Market St, San Francisco |
 | [TechEquity AI Forum — Level 2](events/techequity-2026-07-28.md) | Jul 28, 2026 *(past)* | Snowflake SVAI Hub, Menlo Park |
 
 > **⚠️ Trial signup links are event-specific and time-boxed.** They activate the AI features this workshop needs, and only for accounts created inside a short window around the event. Always use the link on *your* event page — a generic trial won't have what you need.
 
-Working through this on your own? Grab a [free Snowflake trial](https://signup.snowflake.com/) and follow the guide — everything works, you just won't get the pre-enabled AI feature flags.
+Working through this on your own? Grab a [free Snowflake trial](https://signup.snowflake.com/) and follow the guide. The build works, though depending on your region and edition you may need to enable cross-region inference yourself, and some models may not be available to you.
 
 ---
 
@@ -106,7 +106,7 @@ GITTREND_MCP                      →  MCP Server (stretch) — exposes GitTrend
 | [`CHECKPOINTS.sql`](CHECKPOINTS.sql) | Fallback SQL for every step — use if CoCo gets stuck |
 | [`events/`](events/) | Per-event details: date, venue, signup link, timing |
 | [`sample_weekly_digest_skill.md`](sample_weekly_digest_skill.md) | Example Agent Skill to extend GitTrend |
-| [`media/`](media/) | Deck PDF, demo recordings, screenshots |
+| [`media/`](media/) | Deck PDF and demo recordings |
 
 ---
 

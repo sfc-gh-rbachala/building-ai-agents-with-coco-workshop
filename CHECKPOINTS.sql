@@ -67,8 +67,15 @@ FROM (
 )
 PATTERN = '.*json.gz';
 
--- Verify row count (~107M expected)
+-- Verify row count — expect 107,752,158 rows.
+-- A materially lower number means the COPY INTO did not finish. Re-run the COPY INTO
+-- above; it is safe to repeat because the table is CREATE OR REPLACE.
 SELECT COUNT(*) FROM GITTREND_DB.PUBLIC.GITHUB_EVENTS;
+
+-- Confirm the data window. Expect a max around 2026-06-18; the analytical filters below
+-- assume 2026-05-19 to 2026-06-19 and will need adjusting if this dataset ever changes.
+SELECT MIN(CREATED_AT) AS earliest, MAX(CREATED_AT) AS latest
+FROM GITTREND_DB.PUBLIC.GITHUB_EVENTS;
 
 
 -- ============================================================
@@ -83,7 +90,7 @@ SELECT * FROM GITTREND_DB.PUBLIC.GITHUB_EVENTS LIMIT 5;
 -- See all event types available
 SELECT EVENT_TYPE, COUNT(*) AS event_count
 FROM GITTREND_DB.PUBLIC.GITHUB_EVENTS
-WHERE CREATED_AT >= '2026-05-19'
+WHERE CREATED_AT >= '2026-05-19' AND CREATED_AT < '2026-06-19'
 GROUP BY EVENT_TYPE
 ORDER BY event_count DESC;
 
@@ -97,7 +104,7 @@ SELECT
     CREATED_AT
 FROM GITTREND_DB.PUBLIC.GITHUB_EVENTS
 WHERE EVENT_TYPE = 'WatchEvent'
-  AND CREATED_AT >= '2026-05-19'
+  AND CREATED_AT >= '2026-05-19' AND CREATED_AT < '2026-06-19'
 LIMIT 20;
 
 
@@ -114,7 +121,7 @@ SELECT
     MAX(CREATED_AT)    AS last_star_at
 FROM GITTREND_DB.PUBLIC.GITHUB_EVENTS
 WHERE EVENT_TYPE = 'WatchEvent'
-  AND CREATED_AT >= '2026-05-19'
+  AND CREATED_AT >= '2026-05-19' AND CREATED_AT < '2026-06-19'
   AND (
       LOWER(REPO_NAME) LIKE '%llm%'
    OR LOWER(REPO_NAME) LIKE '%agent%'
@@ -173,10 +180,16 @@ CREATE OR REPLACE CORTEX SEARCH SERVICE GITTREND_DB.PUBLIC.GITHUB_REPO_SEARCH
     ATTRIBUTES repo_name, stars_gained
     WAREHOUSE = WORKSHOP_WH
     TARGET_LAG = '1 hour'
+    REFRESH_MODE = FULL
 AS (
     SELECT repo_name, description, stars_gained
     FROM V_TRENDING_AI_REPOS
 );
+
+-- Why REFRESH_MODE = FULL: the default is INCREMENTAL, and service creation FAILS if
+-- Snowflake cannot incrementalize the source query. The source here is an aggregate view
+-- (GROUP BY + HAVING) over 107M rows, which is the shape most at risk of being rejected.
+-- The workshop data is static, so incremental refresh buys nothing. FULL removes the risk.
 
 -- Verify it's active (may take 30-60 seconds)
 SHOW CORTEX SEARCH SERVICES IN SCHEMA GITTREND_DB.PUBLIC;
@@ -197,7 +210,11 @@ models:
 instructions:
   system: >
     You are GitTrend, a GitHub trend analyst with access to 30 days of real
-    GitHub star activity data from the GitHub Archive. You help users discover
+    GitHub star activity data from the GitHub Archive.
+    Your data covers 19 May 2026 through 18 June 2026 and does not update.
+    When a user says "the last 30 days", "this month", or "right now", interpret it
+    as that fixed window, and state the window in your answer so the user is never
+    misled into thinking the data is current. You help users discover
     trending repositories, emerging technologies, and developer community activity
     in AI, ML, open source tooling, and software engineering.
     Always cite which specific repositories you are drawing from when making claims.
