@@ -189,6 +189,7 @@ The summary should:
 - Be concise — 3 to 4 sentences max
 
 Use the 'claude-sonnet-4-6' model.
+Show me the query you ran and the query results.
 ```
 
 **Checkpoint:** the query returns a paragraph, not rows.
@@ -255,7 +256,7 @@ Create it in GITTREND_DB.PUBLIC.
 
 Open GitTrend in Snowflake CoWork:
 
-**Left nav → AI & ML → Agents → `GITTREND` → Preview in Snowflake CoWork**
+**Left nav → AI & ML → Agents → `GITTREND` → Preview → Preview in Snowflake CoWork**
 
 Ask it:
 
