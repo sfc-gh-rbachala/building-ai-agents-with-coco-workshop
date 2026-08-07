@@ -180,16 +180,17 @@ CREATE OR REPLACE CORTEX SEARCH SERVICE GITTREND_DB.PUBLIC.GITHUB_REPO_SEARCH
     ATTRIBUTES repo_name, stars_gained
     WAREHOUSE = WORKSHOP_WH
     TARGET_LAG = '1 hour'
-    REFRESH_MODE = FULL
 AS (
     SELECT repo_name, description, stars_gained
     FROM V_TRENDING_AI_REPOS
 );
 
--- Why REFRESH_MODE = FULL: the default is INCREMENTAL, and service creation FAILS if
--- Snowflake cannot incrementalize the source query. The source here is an aggregate view
--- (GROUP BY + HAVING) over 107M rows, which is the shape most at risk of being rejected.
--- The workshop data is static, so incremental refresh buys nothing. FULL removes the risk.
+-- On REFRESH_MODE: this uses the default, INCREMENTAL, which was verified working
+-- end-to-end on a trial account against this exact SQL. Docs note that creation fails
+-- if a source query can't be incrementalized, and this source is an aggregate view
+-- (GROUP BY + HAVING) over 107M rows — but in practice Snowflake handles it.
+-- If you ever DO hit an incremental-refresh error here, add: REFRESH_MODE = FULL
+-- (safe for this workshop, since the source data is static).
 
 -- Verify it's active (may take 30-60 seconds)
 SHOW CORTEX SEARCH SERVICES IN SCHEMA GITTREND_DB.PUBLIC;

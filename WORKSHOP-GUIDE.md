@@ -205,10 +205,8 @@ Create a Cortex Search Service called GITTREND_DB.PUBLIC.GITHUB_REPO_SEARCH
 using the V_TRENDING_AI_REPOS view we just created.
 
 Search on the description column. Include repo_name and stars_gained as attributes.
-Use WORKSHOP_WH, a target lag of 1 hour, and REFRESH_MODE = FULL.
+Use WORKSHOP_WH and a target lag of 1 hour.
 ```
-
-> **Why `REFRESH_MODE = FULL`:** the default is `INCREMENTAL`, and service creation *fails outright* if Snowflake can't incrementalize the source query. Our source is an aggregate view over 107M rows — the shape most likely to be rejected. The data is static, so incremental refresh gains us nothing.
 
 Takes about 30 seconds. Fire it and move to Step 5 — they overlap.
 
