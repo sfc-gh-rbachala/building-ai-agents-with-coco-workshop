@@ -6,18 +6,25 @@ Presented by [Richie Bachala](https://www.snowflake.com/en/blog/authors/richie-b
 
 ---
 
-## 👉 Attending a live session?
+## Workshop Levels
 
-Start with your event page — it has the signup link, timing, and pre-work specific to your session:
+Three levels, one dataset. Each level builds on the previous.
 
-| Event | When | Where |
-|---|---|---|
-| [**ODSC AI × Snowflake — Build an AI Agent in <60 Min**](events/odsc-2026-08-06.md) | **Aug 6, 2026 — doors 6:00 PM, build 6:30 PM PT** | Mindspace, 575 Market St, San Francisco |
-| [TechEquity AI Forum — Level 2](events/techequity-2026-07-28.md) | Jul 28, 2026 *(past)* | Snowflake SVAI Hub, Menlo Park |
+| Level | Guide | Duration | MCP | Best for |
+|---|---|---|---|---|
+| v1 | [`WORKSHOP-GUIDE.md`](WORKSHOP-GUIDE.md) | 60 min | Take-home | Mixed audiences, large rooms |
+| v2 | [`WORKSHOP-GUIDE-V2.md`](WORKSHOP-GUIDE-V2.md) | 75 min | Live | Technical audiences, smaller rooms |
+| v3 | [`WORKSHOP-GUIDE-V3.md`](WORKSHOP-GUIDE-V3.md) | ~75 min | Carried from v2 | Infrastructure / cost focus |
 
-> **⚠️ Trial signup links are event-specific and time-boxed.** They activate the AI features this workshop needs, and only for accounts created inside a short window around the event. Always use the link on *your* event page — a generic trial won't have what you need.
+See [`VERSION.md`](VERSION.md) for the full level comparison and checkpoint map.
 
-Working through this on your own? Grab a [free Snowflake trial](https://signup.snowflake.com/) and follow the guide. The build works, though depending on your region and edition you may need to enable cross-region inference yourself, and some models may not be available to you.
+---
+
+## Attending a live session?
+
+Pre-work, trial signup links, and timing for each event are in the [`events/`](events/) folder.
+
+Working through this on your own? Grab a [free Snowflake trial](https://signup.snowflake.com/) and follow the guide. You may need to enable cross-region inference: `ALTER ACCOUNT SET CORTEX_ENABLED_CROSS_REGION = 'ANY_REGION';`
 
 ---
 
@@ -68,7 +75,9 @@ CoCo writes every SQL statement. You direct it. You own the result.
 
 ---
 
-## The 5-Step Pattern
+## The Pattern
+
+**v1 — 5-step build (60 min):**
 
 ```
 1. Set the context   →  AGENTS.md + cortex CLI; CoCo learns your account
@@ -78,9 +87,18 @@ CoCo writes every SQL statement. You direct it. You own the result.
 5. Wire the agent    →  Cortex Agent = GitTrend, ready to answer questions
 ```
 
-**Stretch (take-home):** expose GitTrend as an **MCP Server** and query it from Claude Desktop, Cursor, or VS Code.
+**v2 — 4-block build (75 min), MCP live:**
 
-The same pattern works on any dataset in your organization. Swap `GITHUB_EVENTS` for your support tickets, sales pipeline, or product telemetry — same prompts, different schema.
+```
+Step 0  Set the context    AGENTS.md + CoCo CLI
+Step 1  Load the data      107M GitHub events from public S3
+Step 2  Build the agent    5 rapid sub-prompts: explore → view → AI_COMPLETE → Search → Agent
+Step 3  Wire the MCP       CREATE MCP SERVER + OAuth + connect Claude/Cursor/CoCo Desktop
+```
+
+The same pattern works on any dataset in your organization. Swap `GITHUB_EVENTS`
+for your support tickets, sales pipeline, or product telemetry — same prompts,
+different schema.
 
 ---
 
@@ -93,7 +111,7 @@ V_TRENDING_AI_REPOS               →  trending AI repos by star activity
 AI_COMPLETE                       →  turns SQL results into language
 GITHUB_REPO_SEARCH                →  Cortex Search Service (semantic index)
 GITTREND                          →  Cortex Agent (search + chart + system prompt)
-GITTREND_MCP                      →  MCP Server (stretch) — exposes GitTrend anywhere
+GITTREND_MCP                      →  MCP Server — exposes GitTrend anywhere
 ```
 
 ---
@@ -102,9 +120,12 @@ GITTREND_MCP                      →  MCP Server (stretch) — exposes GitTrend
 
 | File | What it is |
 |---|---|
-| [`WORKSHOP-GUIDE.md`](WORKSHOP-GUIDE.md) | Step-by-step build guide — follow this during the session |
+| [`WORKSHOP-GUIDE.md`](WORKSHOP-GUIDE.md) | v1 build guide — 5 steps, MCP take-home |
+| [`WORKSHOP-GUIDE-V2.md`](WORKSHOP-GUIDE-V2.md) | v2 build guide — Steps 0–3 (4 blocks), MCP live |
+| [`WORKSHOP-GUIDE-V3.md`](WORKSHOP-GUIDE-V3.md) | v3 guide — cost intelligence (under development) |
+| [`VERSION.md`](VERSION.md) | Level comparison, checkpoint map, delivery lineage |
 | [`CHECKPOINTS.sql`](CHECKPOINTS.sql) | Fallback SQL for every step — use if CoCo gets stuck |
-| [`events/`](events/) | Per-event details: date, venue, signup link, timing |
+| [`events/`](events/) | Per-event details: date, venue, signup link, timing, level |
 | [`sample_weekly_digest_skill.md`](sample_weekly_digest_skill.md) | Example Agent Skill to extend GitTrend |
 | [`media/`](media/) | Deck PDF and demo recordings |
 

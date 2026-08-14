@@ -6,9 +6,9 @@
 *Foundation to Intelligence Series — Level 2: Build, Extend, and Expose a Production AI Agent with Snowflake CoCo*
 Facilitated by **Richie Bachala**, Solutions Architecture Leader, Snowflake.
 
-**Level:** Intermediate / Advanced
+**Level:** v2 | **Guide:** [`../WORKSHOP-GUIDE-V2.md`](../WORKSHOP-GUIDE-V2.md)
 
-> **This event has passed.** Kept for reference. The build itself is unchanged and still works — see [`../WORKSHOP-GUIDE.md`](../WORKSHOP-GUIDE.md). The trial signup link below has expired; use the link on the current event page instead.
+> **This event has passed.** Kept for reference. The build itself is unchanged and still works — see [`../WORKSHOP-GUIDE-V2.md`](../WORKSHOP-GUIDE-V2.md) (4-block format, MCP live). The trial signup link below has expired; use the link on the current event page instead.
 
 ---
 
