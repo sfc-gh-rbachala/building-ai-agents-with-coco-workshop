@@ -19,8 +19,8 @@ Facilitated by **Richie Bachala**, Solutions Architecture Leader, Snowflake.
 Use the event-specific link below. It activates the AI features this workshop
 needs, and only for accounts created inside the activation window.
 
-> **Trial link:** [TBD — to be generated before the event]
-> **Activation window:** Aug 18–22, 2026 (UTC) — accounts created outside this
+> **Trial link:** https://signup.snowflake.com/?t=f128a8bcb25e35b4e1c114eb153493ac08611899e5ef34d114ca9340ff9ca616&cloud=aws&region=us-east-2
+> **Activation window:** Aug 18–23, 2026 (UTC) — accounts created outside this
 > window are plain trials without AI features.
 
 @snowflake.com emails are exempt from the window (useful for testing).
@@ -125,7 +125,7 @@ Meetup Room. Key session to note for facilitator notes in the guide:
 
 ## Comms Checklist
 
-- [ ] Trial link generated (window: Aug 18–22 UTC)
+- [x] Trial link generated (window: Aug 18–23 UTC)
 - [ ] Pre-event email to registrants (send Aug 18–19)
 - [ ] LinkedIn post
 - [ ] Day-of reminder (morning of Aug 20)
