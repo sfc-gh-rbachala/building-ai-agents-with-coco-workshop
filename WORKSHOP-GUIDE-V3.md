@@ -110,7 +110,7 @@ Check if these objects exist in GITTREND_DB.PUBLIC:
 Show the status of each.
 ```
 
-**If all five exist:** you're ready for Step 4 — skip Step 2.
+**If all five exist:** skip Step 2 and go straight to Step 3.
 
 **If any are missing:** run the SETUP + CP1–CP6 block from
 [`CHECKPOINTS.sql`](CHECKPOINTS.sql) in a Snowsight worksheet to restore the full
@@ -227,12 +227,16 @@ itself is `CORTEX_CODE_CLI`.
 **Checkpoint:** CoCo returns a result set with service types and credit totals.
 
 > **METERING_HISTORY latency:** this view has ~3 hour propagation lag. If your
-> account was just created today, results may be sparse or empty. Use CP7 from
-> [`CHECKPOINTS.sql`](CHECKPOINTS.sql) which uses a wider 30-day window as fallback.
+> account was just created today, results may be sparse or empty.
+>
+> **Delivery note for live sessions:** on brand-new trial accounts, AI usage from
+> Steps 0–3 (run 30–60 min ago) may not yet appear. Options: (1) use the 30-day
+> fallback in CP7 — shows nothing on day 1 but demonstrates the query pattern;
+> (2) facilitator shares screen from a mature account with real data; (3) attendees
+> note the latency and come back tomorrow to see their actual build cost.
 
 > **No rows at all?** Run `USE ROLE ACCOUNTADMIN` first — METERING_HISTORY requires
-> the ACCOUNTADMIN role. Your AGENTS.md already sets this, but CoCo may use a
-> different role context for account-level views.
+> the ACCOUNTADMIN role.
 
 > Stuck? → [`CHECKPOINTS.sql`](CHECKPOINTS.sql) → Checkpoint 7
 
@@ -339,7 +343,10 @@ All of these are real levers you can pull today without changing the agent's beh
 
 **Checkpoint:** you see a cost trend chart and a concrete optimization recommendation.
 
-> Stuck? → [`CHECKPOINTS.sql`](CHECKPOINTS.sql) → Checkpoint 9
+> **Cost Intelligence skill:** This is CoCo's built-in GA feature for cost analysis.
+> You don't invoke it with a slash command — just type the prompt naturally and CoCo
+> activates it automatically when it recognizes a cost question. The skill connects
+> the dots between ACCOUNT_USAGE, warehouse activity, and user behavior in seconds.
 
 ---
 
@@ -384,7 +391,7 @@ GITTREND_MCP                      —  MCP Server + OAuth
 WORKSHOP_AI_MONITOR               —  Resource monitor: ceiling on WORKSHOP_WH compute credits
 Snowflake Budget (AI)             —  Monthly AI credit limit (Agents, Functions, CoCo)
 Per User Quota                    —  Daily per-user AI spending ceiling
-METERING_HISTORY query            —  AI + compute credit breakdown by service type
+METERING_HISTORY cost breakdown   —  AI + compute credit usage by service type
 ```
 
 ---
