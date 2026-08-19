@@ -306,7 +306,7 @@ ALTER USER IDENTIFIER($MY_USER) SET DEFAULT_ROLE = 'ACCOUNTADMIN' DEFAULT_WAREHO
 -- CHECKPOINT 7 — Cost visibility: AI credit usage (multi-view)
 -- ============================================================
 -- v3 Step 4. Requires ACCOUNTADMIN role.
--- Multi-view approach (validated on trial account by Zach Martin, Aug 2026):
+-- Multi-view approach validated on a fresh trial account:
 --   METERING_HISTORY                    — high-level summary,  ~3 hr lag
 --   CORTEX_AI_FUNCTIONS_USAGE_HISTORY   — per-user/model detail, ~2 min lag  ← start here on trial accounts
 --   CORTEX_AGENT_USAGE_HISTORY          — per-agent detail,     ~8 min lag
