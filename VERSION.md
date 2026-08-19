@@ -14,7 +14,7 @@ Three levels, one dataset, one repo. Each level builds on the previous.
 | **New this level** | GitTrend agent | MCP endpoint + external client | Cost visibility + controls |
 | **Step structure** | 5 named steps | Step 0 / 1 / 2 (×5 sub-prompts) / 3 | v2 + Steps 4-6 |
 | **Best for** | Mixed audiences, large rooms, 60 min slots | Technical audiences, 75 min slots | Infrastructure-focused audiences |
-| **Checkpoints** | `CHECKPOINTS.sql` CP1–5 | `CHECKPOINTS.sql` CP1–6 | `CHECKPOINTS.sql` CP1–6 + v3 steps |
+| **Checkpoints** | `CHECKPOINTS.sql` CP1–5 | `CHECKPOINTS.sql` CP1–6 | `CHECKPOINTS.sql` CP1–6 + CP7–9 |
 
 ---
 
@@ -63,10 +63,8 @@ Start here if: your audience cares about AI infrastructure economics and already
 has v2 complete (or can restore from CHECKPOINTS.sql Checkpoint 6).
 
 Builds directly on the live GitTrend agent. Adds cost visibility into the AI
-infrastructure just built, then adds controls. First delivery: TechEquity AI
-Infrastructure Forum, Aug 20, 2026.
-
-Content under development — see the stub guide for the planned structure.
+infrastructure just built, then adds controls and optimization. First delivery:
+TechEquity AI Infrastructure Forum, Aug 20, 2026.
 
 ---
 
@@ -84,9 +82,9 @@ for every step across v1 and v2:
 | CP4 | Cortex Search Service | v1 Step 4b / v2 Step 2④ |
 | CP5 | GITTREND Agent | v1 Step 5a / v2 Step 2⑤ |
 | CP6 | MCP Server + OAuth | v1 Stretch / v2 Step 3 |
-
-v3-specific checkpoints will be added to `CHECKPOINTS.sql` during the v3 build
-sprint.
+| CP7 | METERING_HISTORY cost breakdown | v3 Step 4 |
+| CP8 | Resource monitor on WORKSHOP_WH | v3 Step 5 Part 1 |
+| CP9 | Daily cost trend + service totals | v3 Step 6 |
 
 ---
 
@@ -96,4 +94,4 @@ sprint.
 |---|---|---|---|---|
 | v1 | Jun 30, 2026 | Snowflake SVAI Hub, Menlo Park | ~130 | Snowsight-first; no MCP |
 | v2 | Jul 28, 2026 | Snowflake SVAI Hub, Menlo Park | — | CLI-first; MCP live |
-| v3 | Aug 20, 2026 | Snowflake SVAI Hub, Menlo Park | — | Cost theme; under development |
+| v3 | Aug 20, 2026 | Snowflake SVAI Hub, Menlo Park | — | Cost visibility, resource monitors, per-user quotas |

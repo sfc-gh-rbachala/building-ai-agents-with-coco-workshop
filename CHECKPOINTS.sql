@@ -303,6 +303,98 @@ ALTER USER IDENTIFIER($MY_USER) SET DEFAULT_ROLE = 'ACCOUNTADMIN' DEFAULT_WAREHO
 
 
 -- ============================================================
+-- CHECKPOINT 7 — Cost visibility: AI credit usage by service type
+-- ============================================================
+-- v3 Step 4. Requires ACCOUNTADMIN role.
+-- METERING_HISTORY has ~3hr propagation lag. If results are sparse, widen to -30.
+
+USE ROLE ACCOUNTADMIN;
+
+-- Breakdown by service type (last 7 days)
+SELECT
+    SERVICE_TYPE,
+    ROUND(SUM(CREDITS_USED), 4) AS credits_used
+FROM SNOWFLAKE.ACCOUNT_USAGE.METERING_HISTORY
+WHERE START_TIME >= DATEADD(DAY, -7, CURRENT_TIMESTAMP)
+GROUP BY SERVICE_TYPE
+ORDER BY credits_used DESC;
+
+-- Wider window fallback (last 30 days) — use if account is new and 7-day window is empty
+SELECT
+    SERVICE_TYPE,
+    ROUND(SUM(CREDITS_USED), 4) AS credits_used
+FROM SNOWFLAKE.ACCOUNT_USAGE.METERING_HISTORY
+WHERE START_TIME >= DATEADD(DAY, -30, CURRENT_TIMESTAMP)
+GROUP BY SERVICE_TYPE
+ORDER BY credits_used DESC;
+
+-- Daily trend (last 7 days)
+SELECT
+    DATE_TRUNC('DAY', START_TIME) AS usage_day,
+    SERVICE_TYPE,
+    ROUND(SUM(CREDITS_USED), 4) AS credits_used
+FROM SNOWFLAKE.ACCOUNT_USAGE.METERING_HISTORY
+WHERE START_TIME >= DATEADD(DAY, -7, CURRENT_TIMESTAMP)
+GROUP BY 1, 2
+ORDER BY 1 DESC, 3 DESC;
+
+
+-- ============================================================
+-- CHECKPOINT 8 — Resource monitor on WORKSHOP_WH
+-- ============================================================
+-- v3 Step 5 Part 1. Hard ceiling: suspends warehouse at 100% of quota.
+
+USE ROLE ACCOUNTADMIN;
+
+CREATE OR REPLACE RESOURCE MONITOR WORKSHOP_AI_MONITOR
+  WITH CREDIT_QUOTA = 10
+  FREQUENCY = MONTHLY
+  START_TIMESTAMP = CURRENT_TIMESTAMP
+  TRIGGERS ON 80 PERCENT DO NOTIFY
+           ON 100 PERCENT DO SUSPEND;
+
+ALTER WAREHOUSE WORKSHOP_WH SET RESOURCE_MONITOR = WORKSHOP_AI_MONITOR;
+
+-- Verify
+SHOW RESOURCE MONITORS LIKE 'WORKSHOP_AI_MONITOR';
+
+
+-- ============================================================
+-- CHECKPOINT 9 — Cost trend for Step 6 (chart + optimization)
+-- ============================================================
+-- v3 Step 6. Daily breakdown for visualization + total for "what did it all cost?"
+
+USE ROLE ACCOUNTADMIN;
+
+-- Total by service type — the "what did this workshop cost?" summary
+SELECT
+    SERVICE_TYPE,
+    ROUND(SUM(CREDITS_USED), 4)                        AS total_credits,
+    COUNT(DISTINCT DATE_TRUNC('DAY', START_TIME))       AS days_active
+FROM SNOWFLAKE.ACCOUNT_USAGE.METERING_HISTORY
+WHERE START_TIME >= DATEADD(DAY, -30, CURRENT_TIMESTAMP)
+GROUP BY SERVICE_TYPE
+ORDER BY total_credits DESC;
+
+-- Daily trend — for the inline chart (AI services only)
+SELECT
+    DATE_TRUNC('DAY', START_TIME)   AS usage_day,
+    SERVICE_TYPE,
+    ROUND(SUM(CREDITS_USED), 4)     AS credits_used
+FROM SNOWFLAKE.ACCOUNT_USAGE.METERING_HISTORY
+WHERE START_TIME >= DATEADD(DAY, -7, CURRENT_TIMESTAMP)
+  AND SERVICE_TYPE IN (
+      'AI_INFERENCE',
+      'CORTEX_CODE_CLI',
+      'CORTEX_CODE_DESKTOP',
+      'SNOWFLAKE_INTELLIGENCE',
+      'WAREHOUSE_METERING'
+  )
+GROUP BY 1, 2
+ORDER BY 1 ASC, 3 DESC;
+
+
+-- ============================================================
 -- RUN IT — Test via Search Preview (fallback, no MCP client needed)
 -- ============================================================
 
