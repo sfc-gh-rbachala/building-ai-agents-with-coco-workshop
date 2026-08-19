@@ -340,9 +340,13 @@ ORDER BY 1 DESC, 3 DESC;
 
 
 -- ============================================================
--- CHECKPOINT 8 — Resource monitor on WORKSHOP_WH
+-- CHECKPOINT 8 — Resource monitor on WORKSHOP_WH (compute credits only)
 -- ============================================================
--- v3 Step 5 Part 1. Hard ceiling: suspends warehouse at 100% of quota.
+-- v3 Step 5 Part 1.
+-- IMPORTANT: Resource Monitors cover warehouse COMPUTE credits only.
+-- They do NOT cover AI credits (Cortex Agents, AI Functions, CoCo, CoWork).
+-- AI credits are a separate billing unit (since April 2026, $2.00/credit flat).
+-- For AI cost control use Budgets (Part 2) and Per User Quotas (Part 3).
 
 USE ROLE ACCOUNTADMIN;
 
@@ -357,6 +361,30 @@ ALTER WAREHOUSE WORKSHOP_WH SET RESOURCE_MONITOR = WORKSHOP_AI_MONITOR;
 
 -- Verify
 SHOW RESOURCE MONITORS LIKE 'WORKSHOP_AI_MONITOR';
+
+
+-- ============================================================
+-- CHECKPOINT 8b — Snowflake Budget for AI services
+-- ============================================================
+-- v3 Step 5 Part 2. AI cost ceiling via tag-based Budgets.
+-- Budgets cover: AI Functions, Cortex Agents, CoWork, CoCo.
+-- Monthly limits with Custom Actions (stored proc) on breach.
+--
+-- Fastest path: Snowsight (no SQL required)
+--   Admin → Cost Management → Budgets → + Budget
+--   → Set limit: 20 credits / month
+--   → Service types: AI Functions + Cortex Agents
+--   → Notification: 80%
+--   → Save
+--
+-- SQL path (if CoCo generates it):
+-- CREATE OR REPLACE SNOWFLAKE.CORE.BUDGET WORKSHOP_AI_BUDGET
+--   ALLOWED_BUDGET_AMOUNT = 20
+--   BUDGET_SCOPE = ACCOUNT
+--   PERIOD_START = CURRENT_DATE;
+--
+-- Note: Budget DDL syntax may vary by account version. Use the Snowsight
+-- UI path as the reliable fallback for workshop delivery.
 
 
 -- ============================================================

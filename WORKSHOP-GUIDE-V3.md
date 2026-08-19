@@ -43,9 +43,10 @@ By the end of this session you will:
 ## What v3 Adds
 
 ```
-SNOWFLAKE.ACCOUNT_USAGE.METERING_HISTORY  →  AI credit usage by service type
-WORKSHOP_AI_MONITOR                       →  Resource monitor — hard ceiling on WORKSHOP_WH
-Per User AI Quota                         →  Daily spend limit per user, all AI services
+SNOWFLAKE.ACCOUNT_USAGE.METERING_HISTORY  →  AI + compute credit usage by service type
+WORKSHOP_AI_MONITOR (Resource Monitor)    →  Hard ceiling on warehouse compute spend
+Snowflake Budget (AI services)            →  Monthly limit on AI credits (Agents, Functions, CoCo)
+Per User AI Quota                         →  Daily per-user AI spending ceiling
 ```
 
 The GITTREND agent and MCP Server from v2 are unchanged. You're adding cost
@@ -185,6 +186,14 @@ Show me all MCP Servers in GITTREND_DB.PUBLIC.
 
 > MCP not there? → [`CHECKPOINTS.sql`](CHECKPOINTS.sql) → Checkpoint 6 to restore.
 
+> **Agent Identity (GA, July 28, 2026).** GITTREND now has its own tracked identity
+> in Snowflake's `ACCESS_HISTORY` view, independent of your user session. Governance
+> and security teams can see exactly what it queried, when, and which data it touched
+> — without correlating against your personal session logs. The `agents_info` column
+> (released Aug 3) surfaces this per run. This is the audit foundation the
+> infrastructure security conversation is about: once an agent is acting on behalf of
+> users, governance has to extend to the agent's identity, not just the user's.
+
 ---
 
 # Step 4 — Cost Visibility
@@ -207,6 +216,14 @@ cost breakdown.
 `WAREHOUSE_METERING`. The AI_COMPLETE calls are `AI_INFERENCE`. The CoCo session
 itself is `CORTEX_CODE_CLI`.
 
+> **Two credit types, one view.** `WAREHOUSE_METERING` shows Platform Credits —
+> the edition-priced compute that powers your warehouse. `AI_INFERENCE`,
+> `CORTEX_CODE_CLI`, and similar service types show AI Credits — a separate billing
+> unit introduced April 2026, priced at $2.00/credit flat regardless of your
+> Snowflake edition. They appear together in METERING_HISTORY but are different
+> line items on your bill. This is exactly why Step 5 needs two separate guardrails —
+> one for each credit currency.
+
 **Checkpoint:** CoCo returns a result set with service types and credit totals.
 
 > **METERING_HISTORY latency:** this view has ~3 hour propagation lag. If your
@@ -223,9 +240,15 @@ itself is `CORTEX_CODE_CLI`.
 
 # Step 5 — Cost Controls
 
-**⏱ ~12 min** | Visibility without control is a dashboard. Control makes it governance.
+**⏱ ~14 min** | Visibility without control is a dashboard. Control makes it governance.
 
-### Part 1 — Resource Monitor
+There are two credit currencies in Snowflake now — and they need **separate** guardrails.
+
+> **Compute credits (Platform Credits):** warehouse-metered, edition-priced. Controlled by **Resource Monitors**.
+>
+> **AI credits:** flat $2.00/credit, edition-independent, cover Cortex Agents, AI Functions, CoWork, and CoCo. Resource Monitors do NOT cover these — they need **Budgets** and **Per User Quotas**.
+
+### Part 1 — Resource Monitor (compute ceiling)
 
 ```
 Create a resource monitor called WORKSHOP_AI_MONITOR. Apply it to WORKSHOP_WH.
@@ -233,20 +256,41 @@ Credit quota: 10 credits. Frequency: monthly. Notify me at 80% usage and
 suspend the warehouse at 100%.
 ```
 
-**What CoCo does:** generates `CREATE RESOURCE MONITOR` DDL and an
-`ALTER WAREHOUSE` to attach it.
+**What CoCo does:** generates `CREATE RESOURCE MONITOR` DDL and `ALTER WAREHOUSE`
+to attach it.
 
-**What this means:** if WORKSHOP_WH burns through 10 credits this month, the
-warehouse goes offline. Hard ceiling. No runaway agent can surprise you on the
-bill.
+**What this covers:** the warehouse compute portion of what you built — the S3 data
+load, the Cortex Search refresh, any queries that hit `WORKSHOP_WH` directly.
+It does *not* cover AI inference credits.
 
 > Stuck? → [`CHECKPOINTS.sql`](CHECKPOINTS.sql) → Checkpoint 8
 
-### Part 2 — Per User AI Quota
+### Part 2 — Snowflake Budget (AI cost ceiling)
 
-Resource Monitors cover warehouse compute. Per User Quotas cover AI services
-specifically: CoCo, CoWork, AI Functions, and Cortex Agents. They enforce per-user
-daily or monthly AI spending limits across the account.
+This is the correct primitive for AI spend. Budgets set monthly credit limits on
+AI service types and fire notifications — or execute a stored procedure — when
+thresholds are crossed.
+
+```
+Set up a monthly AI budget for this account. Limit: 20 AI credits per month.
+Cover: AI Functions and Cortex Agents. Notify at 80%.
+```
+
+**Snowsight path (always works):**
+Admin → Cost Management → Budgets → **+ Budget** →
+Set limit: 20 credits / month → Service types: AI Functions + Cortex Agents →
+Notification: 80% → Save
+
+> **What makes Budgets powerful:** when a threshold is crossed you can attach a
+> Custom Action — a stored procedure that fires automatically. Revoke access,
+> write an audit log, post to Slack. The enforcement is programmable, not just
+> passive alerts.
+
+### Part 3 — Per User AI Quota (per-user enforcement)
+
+Budgets track aggregate account-level spend. Per User Quotas add a per-user ceiling
+so no single person can blow the budget — covering CoCo, CoWork, AI Functions, and
+Cortex Agents with a daily or monthly reset.
 
 ```
 Set up a per-user AI spending limit of 5 credits per day for all users in this
@@ -256,13 +300,14 @@ account. This should cover Cortex Agents and AI Functions.
 CoCo will generate the DDL or guide you to the Snowsight path.
 
 **Snowsight path (always works):**
-Snowsight → Admin → Cost Management → Budgets → **+ Budget** → Per User Quota →
+Admin → Cost Management → Budgets → **+ Budget** → Per User Quota →
 5 credits / day → All Users → Services: AI Functions + Cortex Agents → Save
 
 > **Why this matters:** a 5-credit/day per-user limit is the difference between
 > giving your whole org access to agents and locking it down to three approved
 > power users. Per User Quotas are how you democratize AI access without the CFO
-> calling you. Enforcement happens within minutes of creation — no restart needed.
+> calling you. Enforcement is automatic within minutes of creation — no restart
+> needed, no per-user configuration.
 
 ---
 
@@ -274,9 +319,10 @@ You've built the infrastructure. You've measured it. You've put guardrails on it
 Now ask the tool that built it to help you optimize it.
 
 ```
-What is the most expensive AI service in my Snowflake account over the last
-7 days? Show the trend by day as a chart. Then give me a specific recommendation
-to reduce the cost of the GITTREND agent we just built.
+Use the Cost Intelligence skill. Why did AI spending occur in my account
+this week? Break it down by service type and show a daily trend as a chart.
+Then give me a specific recommendation to reduce the cost of the GITTREND
+agent we just built — I want to keep it under 2 AI credits per day.
 ```
 
 **What CoCo does:**
@@ -335,9 +381,10 @@ GITTREND_MCP                      —  MCP Server + OAuth
 
 **v3 (new):**
 ```
-WORKSHOP_AI_MONITOR               —  Resource monitor: hard ceiling on WORKSHOP_WH
-METERING_HISTORY query            —  AI credit breakdown by service type
-Per User Quota                    —  Daily AI spend limit, all users, all AI services
+WORKSHOP_AI_MONITOR               —  Resource monitor: ceiling on WORKSHOP_WH compute credits
+Snowflake Budget (AI)             —  Monthly AI credit limit (Agents, Functions, CoCo)
+Per User Quota                    —  Daily per-user AI spending ceiling
+METERING_HISTORY query            —  AI + compute credit breakdown by service type
 ```
 
 ---
@@ -363,6 +410,15 @@ factual queries, Snowflake routes to a smaller, faster model. For complex multi-
 reasoning, it routes to a larger one. That routing is automatic — but you can
 influence it by writing a clearer system prompt about expected query complexity.
 
+**Explore Cortex AI Gateway.** Per User Quotas and Budgets are the enforcement
+primitives inside your Snowflake account. Cortex AI Gateway (announced July 28, 2026,
+built on Snowflake's Natoma acquisition) is the governance layer above that —
+centralized control over which agents access which MCP servers, models, and tools;
+intelligent routing to cheaper models for simpler tasks; and a full audit trail of
+every agent tool call across your fleet. It covers both Snowflake-native agents
+(CoCo, CoWork, Cortex Agents) and third-party agents (LangChain, LlamaIndex, Bedrock,
+Azure AI Foundry). The next step after per-user quotas.
+
 **Now do it on your own data.** Replace `GITHUB_EVENTS` with your support tickets,
 product telemetry, or internal docs. The METERING_HISTORY cost visibility, resource
 monitors, and per-user quotas work identically on any agent you build.
@@ -372,9 +428,12 @@ monitors, and per-user quotas work identically on any agent you build.
 ## Resources
 
 - [METERING_HISTORY view docs](https://docs.snowflake.com/en/sql-reference/account-usage/metering_history)
+- [AI cost management and governance](https://docs.snowflake.com/en/user-guide/snowflake-cortex/governance-and-availability/ai-cost-management-and-governance)
 - [Resource Monitors](https://docs.snowflake.com/en/user-guide/resource-monitors)
 - [Snowflake Budgets](https://docs.snowflake.com/en/user-guide/budgets)
 - [Cortex AI credit usage](https://docs.snowflake.com/en/user-guide/cost-understanding-compute-credit#cortex-functions)
+- [FinOps for AI: Snowflake's cost management tools (blog)](https://www.snowflake.com/en/blog/ai-finops-cost-management-governance-snowflake/)
+- [Cortex AI Gateway announcement (Black Hat 2026)](https://www.snowflake.com/en/blog/enterprise-ai-security-agentic-mcp-governance/)
 - [Snowflake-managed MCP Server docs](https://docs.snowflake.com/en/user-guide/snowflake-cortex/cortex-agents-mcp)
 - [CoCo CLI documentation](https://docs.snowflake.com/en/user-guide/cortex-code/cortex-code-snowsight)
 - [Workshop repo](https://github.com/sfc-gh-rbachala/building-ai-agents-with-coco-workshop)
