@@ -32,6 +32,18 @@ economics. Teams can't measure what their agents cost, can't set limits before
 something runs away, and can't justify the infrastructure to the people holding
 the budget.
 
+> **This week (Aug 18, 2026):** Snowflake announced Dynamic Model Routing inside
+> Cortex AI Gateway — automatically routing simpler tasks to lighter models,
+> reserving frontier models for complex reasoning. Up to 3x token efficiency on
+> comparable workloads. Sridhar Ramaswamy: *"Usage is an input. The question that
+> matters is what a company gets in return."*
+>
+> That is literally the setup for what we're doing today. The routing handles
+> efficiency at the infrastructure layer automatically. But visibility and control
+> at the application layer — seeing what your account is actually spending, setting
+> guardrails, optimizing your specific agent — is still yours to own.
+> Steps 4–6 are the hands-on version of that story.
+
 By the end of this session you will:
 
 - See exactly what your AI build costs, broken down by service type
@@ -202,6 +214,12 @@ Show me all MCP Servers in GITTREND_DB.PUBLIC.
 
 You built something. Now see what it cost.
 
+> Snowflake's dynamic model routing is already making efficiency decisions at the
+> infrastructure layer — routing simpler queries to lighter models automatically,
+> claiming 3x token efficiency on comparable workloads. But those decisions are
+> invisible unless you're measuring them. METERING_HISTORY is how you see what's
+> actually being consumed in your account.
+
 ```
 Show me a breakdown of AI credit usage in my Snowflake account over the last
 7 days by service type. Use SNOWFLAKE.ACCOUNT_USAGE.METERING_HISTORY.
@@ -340,6 +358,13 @@ agent we just built — I want to keep it under 2 AI credits per day.
 - Switch from `auto` to a smaller model for simple queries
 
 All of these are real levers you can pull today without changing the agent's behavior.
+
+> Dynamic model routing is Snowflake doing this automatically at the infrastructure
+> layer — switching to lighter models for simpler tasks, 3x more efficient on
+> comparable workloads. The recommendations CoCo gives you here are the application-
+> layer version of that same principle: match task complexity to the right cost.
+> Understanding your own levers matters regardless of what the infrastructure
+> already optimizes for you.
 
 **Checkpoint:** you see a cost trend chart and a concrete optimization recommendation.
 
