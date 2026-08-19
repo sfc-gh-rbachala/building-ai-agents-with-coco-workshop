@@ -303,14 +303,20 @@ ALTER USER IDENTIFIER($MY_USER) SET DEFAULT_ROLE = 'ACCOUNTADMIN' DEFAULT_WAREHO
 
 
 -- ============================================================
--- CHECKPOINT 7 — Cost visibility: AI credit usage by service type
+-- CHECKPOINT 7 — Cost visibility: AI credit usage (multi-view)
 -- ============================================================
 -- v3 Step 4. Requires ACCOUNTADMIN role.
--- METERING_HISTORY has ~3hr propagation lag. If results are sparse, widen to -30.
+-- Multi-view approach (validated on trial account by Zach Martin, Aug 2026):
+--   METERING_HISTORY                    — high-level summary,  ~3 hr lag
+--   CORTEX_AI_FUNCTIONS_USAGE_HISTORY   — per-user/model detail, ~2 min lag  ← start here on trial accounts
+--   CORTEX_AGENT_USAGE_HISTORY          — per-agent detail,     ~8 min lag
+--   SNOWFLAKE_COWORK_USAGE_HISTORY      — CoWork sessions,      ~1 hr lag
+-- Service type in METERING_HISTORY: AI_FUNCTIONS (not AI_INFERENCE)
 
 USE ROLE ACCOUNTADMIN;
 
--- Breakdown by service type (last 7 days)
+-- ---- Part A: METERING_HISTORY — high-level summary ----
+-- Breakdown by service type (last 7 days). May be sparse on brand-new accounts (~3 hr lag).
 SELECT
     SERVICE_TYPE,
     ROUND(SUM(CREDITS_USED), 4) AS credits_used
@@ -319,7 +325,7 @@ WHERE START_TIME >= DATEADD(DAY, -7, CURRENT_TIMESTAMP)
 GROUP BY SERVICE_TYPE
 ORDER BY credits_used DESC;
 
--- Wider window fallback (last 30 days) — use if account is new and 7-day window is empty
+-- Wider window fallback (last 30 days) — use if account is new and 7-day window is sparse
 SELECT
     SERVICE_TYPE,
     ROUND(SUM(CREDITS_USED), 4) AS credits_used
@@ -328,15 +334,43 @@ WHERE START_TIME >= DATEADD(DAY, -30, CURRENT_TIMESTAMP)
 GROUP BY SERVICE_TYPE
 ORDER BY credits_used DESC;
 
--- Daily trend (last 7 days)
+-- ---- Part B: CORTEX_AI_FUNCTIONS_USAGE_HISTORY — ~2 min lag ----
+-- Per-user, per-function, per-model detail. Works on brand-new accounts.
 SELECT
-    DATE_TRUNC('DAY', START_TIME) AS usage_day,
-    SERVICE_TYPE,
-    ROUND(SUM(CREDITS_USED), 4) AS credits_used
-FROM SNOWFLAKE.ACCOUNT_USAGE.METERING_HISTORY
+    COALESCE(u.NAME, '(system)') AS user_name,
+    f.FUNCTION_NAME,
+    f.MODEL_NAME,
+    COUNT(*) AS call_count,
+    ROUND(SUM(f.CREDITS), 6) AS credits_used
+FROM SNOWFLAKE.ACCOUNT_USAGE.CORTEX_AI_FUNCTIONS_USAGE_HISTORY f
+LEFT JOIN SNOWFLAKE.ACCOUNT_USAGE.USERS u ON f.USER_ID = u.USER_ID
+WHERE f.START_TIME >= DATEADD(DAY, -7, CURRENT_TIMESTAMP)
+GROUP BY 1, 2, 3
+ORDER BY credits_used DESC;
+
+-- ---- Part C: CORTEX_AGENT_USAGE_HISTORY — ~8 min lag ----
+-- Per-agent, per-user token credit breakdown.
+SELECT
+    AGENT_NAME,
+    USER_NAME,
+    ROUND(SUM(TOKEN_CREDITS), 6) AS token_credits_used,
+    SUM(TOKENS)                  AS total_tokens
+FROM SNOWFLAKE.ACCOUNT_USAGE.CORTEX_AGENT_USAGE_HISTORY
 WHERE START_TIME >= DATEADD(DAY, -7, CURRENT_TIMESTAMP)
-GROUP BY 1, 2
-ORDER BY 1 DESC, 3 DESC;
+GROUP BY AGENT_NAME, USER_NAME
+ORDER BY token_credits_used DESC;
+
+-- ---- Part D: SNOWFLAKE_COWORK_USAGE_HISTORY — ~1 hr lag ----
+-- CoWork session credits per user.
+SELECT
+    USER_NAME,
+    AGENT_NAME,
+    ROUND(SUM(TOKEN_CREDITS), 6) AS token_credits_used,
+    SUM(TOKENS)                  AS total_tokens
+FROM SNOWFLAKE.ACCOUNT_USAGE.SNOWFLAKE_COWORK_USAGE_HISTORY
+WHERE START_TIME >= DATEADD(DAY, -7, CURRENT_TIMESTAMP)
+GROUP BY USER_NAME, AGENT_NAME
+ORDER BY token_credits_used DESC;
 
 
 -- ============================================================
@@ -412,7 +446,7 @@ SELECT
 FROM SNOWFLAKE.ACCOUNT_USAGE.METERING_HISTORY
 WHERE START_TIME >= DATEADD(DAY, -7, CURRENT_TIMESTAMP)
   AND SERVICE_TYPE IN (
-      'AI_INFERENCE',
+      'AI_FUNCTIONS',
       'CORTEX_CODE_CLI',
       'CORTEX_CODE_DESKTOP',
       'SNOWFLAKE_INTELLIGENCE',

@@ -55,10 +55,12 @@ By the end of this session you will:
 ## What v3 Adds
 
 ```
-SNOWFLAKE.ACCOUNT_USAGE.METERING_HISTORY  →  AI + compute credit usage by service type
-WORKSHOP_AI_MONITOR (Resource Monitor)    →  Hard ceiling on warehouse compute spend
-Snowflake Budget (AI services)            →  Monthly limit on AI credits (Agents, Functions, CoCo)
-Per User AI Quota                         →  Daily per-user AI spending ceiling
+SNOWFLAKE.ACCOUNT_USAGE.METERING_HISTORY     →  AI + compute credit usage by service type (≈3 hr lag)
+CORTEX_AI_FUNCTIONS_USAGE_HISTORY            →  per-user / per-model AI function detail (≈2 min lag)
+CORTEX_AGENT_USAGE_HISTORY                   →  per-agent token credit breakdown (≈8 min lag)
+WORKSHOP_AI_MONITOR (Resource Monitor)       →  Hard ceiling on warehouse compute spend
+Snowflake Budget (AI services)               →  Monthly limit on AI credits (Agents, Functions, CoCo)
+Per User AI Quota                            →  Daily per-user AI spending ceiling
 ```
 
 The GITTREND agent and MCP Server from v2 are unchanged. You're adding cost
@@ -221,40 +223,51 @@ You built something. Now see what it cost.
 > actually being consumed in your account.
 
 ```
-Show me a breakdown of AI credit usage in my Snowflake account over the last
-7 days by service type. Use SNOWFLAKE.ACCOUNT_USAGE.METERING_HISTORY.
-Include total credits per service type, ordered by highest usage.
+Show me a breakdown of AI credit usage in my Snowflake account over the last 7 days.
+Start with a high-level summary using SNOWFLAKE.ACCOUNT_USAGE.METERING_HISTORY — total credits by service type, ordered by highest usage.
+Then show the detail from three views:
+
+CORTEX_AI_FUNCTIONS_USAGE_HISTORY — group by FUNCTION_NAME and MODEL_NAME, sum CREDITS. Join USER_ID to SNOWFLAKE.ACCOUNT_USAGE.USERS to get USER_NAME.
+CORTEX_AGENT_USAGE_HISTORY — group by AGENT_NAME and USER_NAME, sum TOKEN_CREDITS and TOKENS
+SNOWFLAKE_COWORK_USAGE_HISTORY — group by USER_NAME and AGENT_NAME, sum TOKEN_CREDITS and TOKENS
+
+For each detail view, order by highest spend. Then give me a one-sentence summary of which service type drove the most usage.
 ```
 
-**What CoCo does:** queries METERING_HISTORY, groups by `SERVICE_TYPE`, returns the
-cost breakdown.
+**What CoCo does:** runs four queries — METERING_HISTORY for the high-level service
+type summary, then three detail views for per-user, per-model, per-function breakdown.
+Each view has a different latency (see note below).
 
-**What you'll see:** service types like `WAREHOUSE_METERING`, `AI_INFERENCE`,
-`CORTEX_CODE_CLI`. Each one maps to something you built. The S3 load is
-`WAREHOUSE_METERING`. The AI_COMPLETE calls are `AI_INFERENCE`. The CoCo session
-itself is `CORTEX_CODE_CLI`.
+**What you'll see:**
+- **Summary (METERING_HISTORY):** `WAREHOUSE_METERING`, `AI_FUNCTIONS`, `CORTEX_SEARCH` — total credits by billing category
+- **Detail (CORTEX_AI_FUNCTIONS_USAGE_HISTORY):** per user, per function, per model — e.g., `YOURNAME | AI_COMPLETE | claude-sonnet-4-6 | 0.0048 credits`. The most actionable view: exactly what your agent called and what it cost.
+- **Detail (CORTEX_AGENT_USAGE_HISTORY):** token credits per agent per user (may be empty on new accounts)
+- **Detail (SNOWFLAKE_COWORK_USAGE_HISTORY):** CoWork session credits per user (may be empty on new accounts)
 
-> **Two credit types, one view.** `WAREHOUSE_METERING` shows Platform Credits —
-> the edition-priced compute that powers your warehouse. `AI_INFERENCE`,
-> `CORTEX_CODE_CLI`, and similar service types show AI Credits — a separate billing
-> unit introduced April 2026, priced at $2.00/credit flat regardless of your
-> Snowflake edition. They appear together in METERING_HISTORY but are different
-> line items on your bill. This is exactly why Step 5 needs two separate guardrails —
-> one for each credit currency.
+> **Two credit types, four views.** In METERING_HISTORY, `WAREHOUSE_METERING` shows
+> Platform Credits — the edition-priced compute that powers your warehouse.
+> `AI_FUNCTIONS` and `CORTEX_SEARCH` show AI Credits — a separate billing unit
+> introduced April 2026, priced at $2.00/credit flat regardless of your Snowflake
+> edition. The three detail views break those AI credits down further: which user,
+> which function, which model, which agent. This is exactly why Step 5 needs two
+> separate guardrails — one for each credit currency.
 
 **Checkpoint:** CoCo returns a result set with service types and credit totals.
 
-> **METERING_HISTORY latency:** this view has ~3 hour propagation lag. If your
-> account was just created today, results may be sparse or empty.
+> **View latency — good news for trial accounts:** the detail views are much faster
+> than METERING_HISTORY. Your AI usage from Steps 0–3 (run 30–60 min ago) will
+> already be in `CORTEX_AI_FUNCTIONS_USAGE_HISTORY` and `CORTEX_AGENT_USAGE_HISTORY`
+> — even on a brand-new account. The METERING_HISTORY summary (~3 hr lag) may be
+> sparse, but the detail views will have data.
 >
-> **Delivery note for live sessions:** on brand-new trial accounts, AI usage from
-> Steps 0–3 (run 30–60 min ago) may not yet appear. Options: (1) use the 30-day
-> fallback in CP7 — shows nothing on day 1 but demonstrates the query pattern;
-> (2) facilitator shares screen from a mature account with real data; (3) attendees
-> note the latency and come back tomorrow to see their actual build cost.
+> Latency reference:
+> - `CORTEX_AI_FUNCTIONS_USAGE_HISTORY` — ≈2 min
+> - `CORTEX_AGENT_USAGE_HISTORY` — ≈8 min
+> - `SNOWFLAKE_COWORK_USAGE_HISTORY` — ≈1 hr
+> - `METERING_HISTORY` (summary) — ≈3 hr
 
-> **No rows at all?** Run `USE ROLE ACCOUNTADMIN` first — METERING_HISTORY requires
-> the ACCOUNTADMIN role.
+> **No rows at all?** Run `USE ROLE ACCOUNTADMIN` first — all ACCOUNT_USAGE views
+> require ACCOUNTADMIN.
 
 > Stuck? → [`CHECKPOINTS.sql`](CHECKPOINTS.sql) → Checkpoint 7
 
@@ -416,7 +429,7 @@ GITTREND_MCP                      —  MCP Server + OAuth
 WORKSHOP_AI_MONITOR               —  Resource monitor: ceiling on WORKSHOP_WH compute credits
 Snowflake Budget (AI)             —  Monthly AI credit limit (Agents, Functions, CoCo)
 Per User Quota                    —  Daily per-user AI spending ceiling
-METERING_HISTORY cost breakdown   —  AI + compute credit usage by service type
+Multi-view cost breakdown         —  METERING_HISTORY + 3 detail views (per-user, per-model, per-agent)
 ```
 
 ---
