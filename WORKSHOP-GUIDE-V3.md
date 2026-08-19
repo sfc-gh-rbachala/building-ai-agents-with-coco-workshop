@@ -254,17 +254,17 @@ Each view has a different latency (see note below).
 
 **Checkpoint:** CoCo returns a result set with service types and credit totals.
 
-> **View latency — good news for trial accounts:** the detail views are much faster
-> than METERING_HISTORY. Your AI usage from Steps 0–3 (run 30–60 min ago) will
-> already be in `CORTEX_AI_FUNCTIONS_USAGE_HISTORY` and `CORTEX_AGENT_USAGE_HISTORY`
-> — even on a brand-new account. The METERING_HISTORY summary (~3 hr lag) may be
-> sparse, but the detail views will have data.
+> **View latency — good news for trial accounts:** `CORTEX_AI_FUNCTIONS_USAGE_HISTORY`
+> has a ≤5 min SLA (best effort ~2 min) — your AI_COMPLETE calls from Steps 0–3 will
+> already be there even on a brand-new account. The other views have up to 1 hr lag
+> (CORTEX_AGENT_USAGE_HISTORY, SNOWFLAKE_COWORK_USAGE_HISTORY), and METERING_HISTORY
+> up to 3 hr — those may be sparse on day 1.
 >
 > Latency reference:
-> - `CORTEX_AI_FUNCTIONS_USAGE_HISTORY` — ≈2 min
-> - `CORTEX_AGENT_USAGE_HISTORY` — ≈8 min
-> - `SNOWFLAKE_COWORK_USAGE_HISTORY` — ≈1 hr
-> - `METERING_HISTORY` (summary) — ≈3 hr
+> - `CORTEX_AI_FUNCTIONS_USAGE_HISTORY` — ≤5 min (SLA), ~2 min typical
+> - `CORTEX_AGENT_USAGE_HISTORY` — up to 1 hr
+> - `SNOWFLAKE_COWORK_USAGE_HISTORY` — up to 1 hr
+> - `METERING_HISTORY` (summary) — up to 3 hr
 
 > **No rows at all?** Run `USE ROLE ACCOUNTADMIN` first — all ACCOUNT_USAGE views
 > require ACCOUNTADMIN.

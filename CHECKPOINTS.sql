@@ -308,9 +308,9 @@ ALTER USER IDENTIFIER($MY_USER) SET DEFAULT_ROLE = 'ACCOUNTADMIN' DEFAULT_WAREHO
 -- v3 Step 4. Requires ACCOUNTADMIN role.
 -- Multi-view approach validated on a fresh trial account:
 --   METERING_HISTORY                    — high-level summary,  ~3 hr lag
---   CORTEX_AI_FUNCTIONS_USAGE_HISTORY   — per-user/model detail, ~2 min lag  ← start here on trial accounts
---   CORTEX_AGENT_USAGE_HISTORY          — per-agent detail,     ~8 min lag
---   SNOWFLAKE_COWORK_USAGE_HISTORY      — CoWork sessions,      ~1 hr lag
+--   CORTEX_AI_FUNCTIONS_USAGE_HISTORY   — per-user/model detail, ≤5 min lag  ← start here on trial accounts
+--   CORTEX_AGENT_USAGE_HISTORY          — per-agent detail,     up to 1 hr lag
+--   SNOWFLAKE_COWORK_USAGE_HISTORY      — CoWork sessions,      up to 1 hr lag
 -- Service type in METERING_HISTORY: AI_FUNCTIONS (not AI_INFERENCE)
 
 USE ROLE ACCOUNTADMIN;
@@ -334,7 +334,7 @@ WHERE START_TIME >= DATEADD(DAY, -30, CURRENT_TIMESTAMP)
 GROUP BY SERVICE_TYPE
 ORDER BY credits_used DESC;
 
--- ---- Part B: CORTEX_AI_FUNCTIONS_USAGE_HISTORY — ~2 min lag ----
+-- Part B: CORTEX_AI_FUNCTIONS_USAGE_HISTORY — ≤5 min lag (SLA), ~2 min typical ----
 -- Per-user, per-function, per-model detail. Works on brand-new accounts.
 SELECT
     COALESCE(u.NAME, '(system)') AS user_name,
@@ -348,7 +348,7 @@ WHERE f.START_TIME >= DATEADD(DAY, -7, CURRENT_TIMESTAMP)
 GROUP BY 1, 2, 3
 ORDER BY credits_used DESC;
 
--- ---- Part C: CORTEX_AGENT_USAGE_HISTORY — ~8 min lag ----
+-- ---- Part C: CORTEX_AGENT_USAGE_HISTORY — up to 1 hr lag ----
 -- Per-agent, per-user token credit breakdown.
 SELECT
     AGENT_NAME,
@@ -360,7 +360,7 @@ WHERE START_TIME >= DATEADD(DAY, -7, CURRENT_TIMESTAMP)
 GROUP BY AGENT_NAME, USER_NAME
 ORDER BY token_credits_used DESC;
 
--- ---- Part D: SNOWFLAKE_COWORK_USAGE_HISTORY — ~1 hr lag ----
+-- ---- Part D: SNOWFLAKE_COWORK_USAGE_HISTORY — up to 1 hr lag ----
 -- CoWork session credits per user.
 SELECT
     USER_NAME,
