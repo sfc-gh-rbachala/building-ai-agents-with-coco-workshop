@@ -387,7 +387,7 @@ USE ROLE ACCOUNTADMIN;
 CREATE OR REPLACE RESOURCE MONITOR WORKSHOP_AI_MONITOR
   WITH CREDIT_QUOTA = 10
   FREQUENCY = MONTHLY
-  START_TIMESTAMP = CURRENT_TIMESTAMP
+  START_TIMESTAMP = IMMEDIATELY
   TRIGGERS ON 80 PERCENT DO NOTIFY
            ON 100 PERCENT DO SUSPEND;
 
@@ -398,27 +398,72 @@ SHOW RESOURCE MONITORS LIKE 'WORKSHOP_AI_MONITOR';
 
 
 -- ============================================================
--- CHECKPOINT 8b — Snowflake Budget for AI services
+-- CHECKPOINT 8b — Account Budget (account-wide spending ceiling)
 -- ============================================================
--- v3 Step 5 Part 2. AI cost ceiling via tag-based Budgets.
--- Budgets cover: AI Functions, Cortex Agents, CoWork, CoCo.
--- Monthly limits with Custom Actions (stored proc) on breach.
+-- v3 Step 5 Part 2.
+-- The account budget monitors ALL credit usage in your account:
+-- AI_SERVICES, WAREHOUSE_METERING, CORTEX_SEARCH, and more.
+-- No tag setup required — works on any account immediately.
+
+USE ROLE ACCOUNTADMIN;
+
+-- Activate the built-in account budget (one-time per account)
+CALL snowflake.local.account_root_budget!ACTIVATE();
+
+-- Set a monthly spending limit (50 credits covers a full workshop build)
+CALL snowflake.local.account_root_budget!SET_SPENDING_LIMIT(50);
+
+-- Configure email notifications (replace with your email)
+CALL snowflake.local.account_root_budget!SET_EMAIL_NOTIFICATIONS('your-email@example.com');
+
+-- Check current config
+CALL snowflake.local.account_root_budget!GET_SPENDING_LIMIT();
+
+-- View in Snowsight: Admin → Cost Management → Budgets → Account Budget tab
+-- Note: budget refresh interval is up to 6.5 hours by default (notifications
+-- are forecast-based, not real-time). For per-request AI enforcement, use
+-- Per User Quotas (Part 3).
 --
--- Fastest path: Snowsight (no SQL required)
---   Admin → Cost Management → Budgets → + Budget
---   → Set limit: 20 credits / month
---   → Service types: AI Functions + Cortex Agents
---   → Notification: 80%
---   → Save
---
--- SQL path (if CoCo generates it):
--- CREATE OR REPLACE SNOWFLAKE.CORE.BUDGET WORKSHOP_AI_BUDGET
---   ALLOWED_BUDGET_AMOUNT = 20
---   BUDGET_SCOPE = ACCOUNT
---   PERIOD_START = CURRENT_DATE;
---
--- Note: Budget DDL syntax may vary by account version. Use the Snowsight
--- UI path as the reliable fallback for workshop delivery.
+-- For production: Custom budgets let you scope spend by team or cost center
+-- using user tags, with programmable stored-procedure actions on breach.
+-- Docs: https://docs.snowflake.com/en/user-guide/budgets/budget-shared-resources
+
+
+-- ============================================================
+-- CHECKPOINT 8c — Per User AI Quota (per-user enforcement)
+-- ============================================================
+-- v3 Step 5 Part 3.
+-- Per User Quotas cap how many AI credits any single user can burn per cycle.
+-- Covers AI Functions, Cortex Agents, CoCo, and CoWork.
+-- NOTE: minimum limit is 1 credit (integer only).
+
+-- Step 1: create the quota object
+CREATE OR REPLACE SNOWFLAKE.CORE.QUOTA WORKSHOP_AI_QUOTA();
+
+-- Step 2: add the AI domains to monitor
+CALL WORKSHOP_AI_QUOTA!ADD_SHARED_RESOURCE('AI FUNCTION');
+CALL WORKSHOP_AI_QUOTA!ADD_SHARED_RESOURCE('CORTEX AGENT');
+CALL WORKSHOP_AI_QUOTA!ADD_SHARED_RESOURCE('SNOWFLAKE INTELLIGENCE'); -- CoWork
+CALL WORKSHOP_AI_QUOTA!ADD_SHARED_RESOURCE('CORTEX CODE');            -- CoCo
+
+-- Step 3: set per-user spending limits
+CALL WORKSHOP_AI_QUOTA!SET_PER_USER_LIMIT(20);          -- monthly
+CALL WORKSHOP_AI_QUOTA!SET_PER_USER_LIMIT(5, 'DAILY');  -- daily
+
+-- Step 4: optionally enable block enforcement (first arg: enable, second arg: notify user)
+-- CALL WORKSHOP_AI_QUOTA!SET_BLOCK_ENFORCEMENT_ENABLED(TRUE, TRUE);
+
+-- Verify config
+CALL WORKSHOP_AI_QUOTA!GET_CONFIG();
+
+-- Check who (if anyone) is currently blocked
+CALL WORKSHOP_AI_QUOTA!GET_ACTIVE_BLOCKS_V2();
+
+-- OR: use the Snowsight wizard (same result, no SQL required):
+-- Admin → Cost Management → Budgets → + Budget → Quota
+--   Scope: All users · AI-related features
+--   Basic info: name WORKSHOP_AI_QUOTA, schema GITTREND_DB.PUBLIC
+--   Monthly 20 · Daily 5 · Enable enforcement on
 
 
 -- ============================================================

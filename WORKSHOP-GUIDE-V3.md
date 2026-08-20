@@ -300,26 +300,30 @@ It does *not* cover AI inference credits.
 
 > Stuck? → [`CHECKPOINTS.sql`](CHECKPOINTS.sql) → Checkpoint 8
 
-### Part 2 — Snowflake Budget (AI cost ceiling)
+### Part 2 — Account Budget (account-wide spending ceiling)
 
-This is the correct primitive for AI spend. Budgets set monthly credit limits on
-AI service types and fire notifications — or execute a stored procedure — when
-thresholds are crossed.
+Snowflake's built-in account budget monitors all credit usage in your account
+— warehouse compute, AI services, Cortex Search, everything.
 
 ```
-Set up a monthly AI budget for this account. Limit: 20 AI credits per month.
-Cover: AI Functions and Cortex Agents. Notify at 80%.
+Activate the account budget. Set a monthly spending limit of 50 credits.
+Notify me when projected spend is on track to exceed the limit.
 ```
 
-**Snowsight path (always works):**
-Admin → Cost Management → Budgets → **+ Budget** →
-Set limit: 20 credits / month → Service types: AI Functions + Cortex Agents →
-Notification: 80% → Save
+**What CoCo does:** activates `snowflake.local.account_root_budget`, sets the
+spending limit, and configures email notifications.
 
-> **What makes Budgets powerful:** when a threshold is crossed you can attach a
-> Custom Action — a stored procedure that fires automatically. Revoke access,
-> write an audit log, post to Slack. The enforcement is programmable, not just
-> passive alerts.
+**What this covers:** every credit-consuming service in your account, including
+AI services (Cortex Agents, AI Functions, CoCo, CoWork) and warehouse compute.
+One object, no scoping required.
+
+> **Custom budgets vs. account budget:** Custom budgets let you scope AI spend
+> by team or cost center using user tags — the right primitive for multi-team
+> attribution in production. For this workshop (single user, no tags), the
+> account budget is the correct starting point. See
+> [Snowflake Budgets](https://docs.snowflake.com/en/user-guide/budgets) to go deeper.
+
+> Stuck? → [`CHECKPOINTS.sql`](CHECKPOINTS.sql) → Checkpoint 8b
 
 ### Part 3 — Per User AI Quota (per-user enforcement)
 
@@ -328,15 +332,20 @@ so no single person can blow the budget — covering CoCo, CoWork, AI Functions,
 Cortex Agents with a daily or monthly reset.
 
 ```
-Set up a per-user AI spending limit of 5 credits per day for all users in this
-account. This should cover Cortex Agents and AI Functions.
+Set up a per-user AI spending quota for this account. Name it WORKSHOP_AI_QUOTA,
+store it in GITTREND_DB.PUBLIC. Cover all AI features (AI Functions, Cortex Agents,
+CoCo, CoWork). Monthly limit: 20 credits. Daily limit: 5 credits.
+Enable block enforcement.
 ```
 
 CoCo will generate the DDL or guide you to the Snowsight path.
 
 **Snowsight path (always works):**
-Admin → Cost Management → Budgets → **+ Budget** → Per User Quota →
-5 credits / day → All Users → Services: AI Functions + Cortex Agents → Save
+Admin → Cost Management → Budgets → **+ Budget** → **Quota**
+
+1. **Quota scope:** Specify users → All users in the account. Specify resources → AI-related features (AI Functions, CoCo, Cortex Agents, Snowflake CoWork).
+2. **Basic information:** Name: `WORKSHOP_AI_QUOTA`. Location: `GITTREND_DB.PUBLIC`. Monthly limit: 20. Daily limit: 5.
+3. **Alerts & enforcement:** Alert at 80% (Actual spend, Monthly). Toggle **Enable enforcement** on. Add your email under Summary emails → Save.
 
 > **Why this matters:** a 5-credit/day per-user limit is the difference between
 > giving your whole org access to agents and locking it down to three approved
