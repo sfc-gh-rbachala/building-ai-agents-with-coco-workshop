@@ -307,21 +307,25 @@ Snowflake's built-in account budget monitors all credit usage in your account
 
 ```
 Activate the account budget. Set a monthly spending limit of 50 credits.
-Notify me when projected spend is on track to exceed the limit.
 ```
 
-**What CoCo does:** activates `snowflake.local.account_root_budget`, sets the
-spending limit, and configures email notifications.
+**What CoCo does:** activates `snowflake.local.account_root_budget` and sets
+the monthly spending limit.
 
 **What this covers:** every credit-consuming service in your account, including
 AI services (Cortex Agents, AI Functions, CoCo, CoWork) and warehouse compute.
 One object, no scoping required.
 
-> **Custom budgets vs. account budget:** Custom budgets let you scope AI spend
-> by team or cost center using user tags — the right primitive for multi-team
-> attribution in production. For this workshop (single user, no tags), the
-> account budget is the correct starting point. See
-> [Snowflake Budgets](https://docs.snowflake.com/en/user-guide/budgets) to go deeper.
+> **Notifications require extra setup.** Budget email alerts need a verified
+> email address in Snowflake plus a `CREATE NOTIFICATION INTEGRATION TYPE=EMAIL`
+> with `GRANT USAGE ... TO APPLICATION SNOWFLAKE`. That's out of scope for a
+> live workshop. To configure notifications, use the Snowsight path:
+> Admin → Cost Management → Budgets → Account Budget → Edit — the UI validates
+> your email automatically.
+>
+> **For production:** Custom budgets scope AI spend by team or cost center
+> via user tags, with programmable stored-procedure enforcement on breach.
+> See [Snowflake Budgets](https://docs.snowflake.com/en/user-guide/budgets).
 
 > Stuck? → [`CHECKPOINTS.sql`](CHECKPOINTS.sql) → Checkpoint 8b
 

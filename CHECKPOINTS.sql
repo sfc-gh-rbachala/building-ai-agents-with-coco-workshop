@@ -413,20 +413,17 @@ CALL snowflake.local.account_root_budget!ACTIVATE();
 -- Set a monthly spending limit (50 credits covers a full workshop build)
 CALL snowflake.local.account_root_budget!SET_SPENDING_LIMIT(50);
 
--- Configure email notifications (replace with your email)
-CALL snowflake.local.account_root_budget!SET_EMAIL_NOTIFICATIONS('your-email@example.com');
-
--- Check current config
+-- Verify the spending limit is set
 CALL snowflake.local.account_root_budget!GET_SPENDING_LIMIT();
 
--- View in Snowsight: Admin → Cost Management → Budgets → Account Budget tab
--- Note: budget refresh interval is up to 6.5 hours by default (notifications
--- are forecast-based, not real-time). For per-request AI enforcement, use
--- Per User Quotas (Part 3).
---
--- For production: Custom budgets let you scope spend by team or cost center
--- using user tags, with programmable stored-procedure actions on breach.
--- Docs: https://docs.snowflake.com/en/user-guide/budgets/budget-shared-resources
+-- ⚠ Email notifications are NOT set here.
+-- SET_EMAIL_NOTIFICATIONS requires a verified email address AND a pre-configured
+-- email notification integration (CREATE NOTIFICATION INTEGRATION TYPE=EMAIL +
+-- GRANT USAGE ... TO APPLICATION SNOWFLAKE). That setup is out of scope for a
+-- live workshop on a trial account.
+-- Use the Snowsight path instead:
+--   Admin → Cost Management → Budgets → Account Budget
+--   The UI validates the logged-in user's verified email automatically.
 
 
 -- ============================================================
