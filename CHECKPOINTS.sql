@@ -1,19 +1,26 @@
 -- ============================================================
 -- GITTREND WORKSHOP CHECKPOINTS
--- Building AI Agents with Snowflake CoCo
--- Companion to WORKSHOP-GUIDE.md
+-- Building AI Agents with Snowflake CoCo (v2 + v3)
+-- Companion to WORKSHOP-GUIDE-V2.md and WORKSHOP-GUIDE-V3.md
 --
 -- Use these if CoCo gets stuck or you fall behind.
--- Run each checkpoint in a Snowflake SQL Worksheet or via snow sql.
+-- Run each checkpoint in a Snowflake SQL Worksheet.
 --
--- Map to guide steps:
---   SETUP         -> Step 2 (load the data)
---   Checkpoint 1  -> Step 3a (explore schema)
---   Checkpoint 2  -> Step 3b (V_TRENDING_AI_REPOS)
---   Checkpoint 3  -> Step 4a (AI_COMPLETE)
---   Checkpoint 4  -> Step 4b (Cortex Search Service)
---   Checkpoint 5  -> Step 5a (Cortex Agent)
---   Checkpoint 6  -> Stretch step (MCP Server + OAuth) - take-home, optional
+-- v2 guide map (Steps 0–5):
+--   SETUP         → creates DB, schema, warehouse, loads 107M events (~4 min)
+--   Checkpoint 1  → Step 2: explore schema
+--   Checkpoint 2  → Step 2: V_TRENDING_AI_REPOS view
+--   Checkpoint 3  → Step 2: AI_COMPLETE trend summary
+--   Checkpoint 4  → Step 3: Cortex Search Service
+--   Checkpoint 5  → Step 4: Cortex Agent
+--   Checkpoint 6  → Step 5: MCP Server + OAuth (required for v3)
+--
+-- v3 guide map (Steps 4–6 — run after CP6 or with existing v2 build):
+--   Checkpoint 7  → Step 4: Cost visibility (multi-view AI credit breakdown)
+--   Checkpoint 8  → Step 5 Part 1: Resource monitor on WORKSHOP_WH
+--   Checkpoint 8b → Step 5 Part 2: Account budget
+--   Checkpoint 8c → Step 5 Part 3: Per user AI quota
+--   Checkpoint 9  → Step 6: Cost trend chart + optimization
 -- ============================================================
 
 -- SETUP (run once at the start)

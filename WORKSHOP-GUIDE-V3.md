@@ -103,6 +103,8 @@ cortex
 > **Connecting:** The easiest method is **Sign in with browser** (or **Sync from
 > app.snowflake.com** if you see that label) — opens a browser popup that
 > authenticates via your existing Snowflake session. No credentials to type.
+> If the browser opens multiple tabs in a loop, upgrade CoCo Desktop to v1.21.0+
+> (this was a known bug, now fixed).
 
 **Checkpoint:** `Loaded 1 instruction file` appears below the connection panel.
 
@@ -253,7 +255,10 @@ Each view has a different latency (see note below).
 > which function, which model, which agent. This is exactly why Step 5 needs two
 > separate guardrails — one for each credit currency.
 
-**Checkpoint:** CoCo returns a result set with service types and credit totals.
+**Checkpoint:** CoCo returns four result sets. On a brand-new trial account:
+`CORTEX_AI_FUNCTIONS_USAGE_HISTORY` will show your AI_COMPLETE calls within
+minutes. METERING_HISTORY may show only `WAREHOUSE_METERING` until the 3 hr
+lag passes — that's expected.
 
 > **View latency — good news for trial accounts:** `CORTEX_AI_FUNCTIONS_USAGE_HISTORY`
 > has a ≤5 min SLA (best effort ~2 min) — your AI_COMPLETE calls from Steps 0–3 will
@@ -350,7 +355,7 @@ Admin → Cost Management → Budgets → **+ Budget** → **Quota**
 
 1. **Quota scope:** Specify users → All users in the account. Specify resources → AI-related features (AI Functions, CoCo, Cortex Agents, Snowflake CoWork).
 2. **Basic information:** Name: `WORKSHOP_AI_QUOTA`. Location: `GITTREND_DB.PUBLIC`. Monthly limit: 20. Daily limit: 5.
-3. **Alerts & enforcement:** Alert at 80% (Actual spend, Monthly). Toggle **Enable enforcement** on. Add your email under Summary emails → Save.
+3. **Alerts & enforcement:** Alert at 80% (Actual spend, Monthly). Toggle **Enable enforcement** on. Add your email under Summary emails — this requires a verified email; skip if it fails. → Save.
 
 > **Why this matters:** a 5-credit/day per-user limit is the difference between
 > giving your whole org access to agents and locking it down to three approved
@@ -388,11 +393,11 @@ I want to keep it under 2 AI credits per day.
 All of these are real levers you can pull today without changing the agent's behavior.
 
 > Dynamic model routing is Snowflake doing this automatically at the infrastructure
-> layer — switching to lighter models for simpler tasks, 3x more efficient on
-> comparable workloads. The recommendations CoCo gives you here are the application-
-> layer version of that same principle: match task complexity to the right cost.
-> Understanding your own levers matters regardless of what the infrastructure
-> already optimizes for you.
+> layer — switching to lighter models for simpler tasks, up to 3x greater token
+> efficiency on comparable workloads. The recommendations CoCo gives you here are
+> the application-layer version of that same principle: match task complexity to
+> the right cost. Understanding your own levers matters regardless of what the
+> infrastructure already optimizes for you.
 
 **Checkpoint:** you see a cost trend chart and a concrete optimization recommendation.
 
