@@ -471,6 +471,8 @@ CALL WORKSHOP_AI_QUOTA!GET_ACTIVE_BLOCKS_V2();
 USE ROLE ACCOUNTADMIN;
 
 -- Total by service type — the "what did this workshop cost?" summary
+-- Note: AI_FUNCTIONS won't appear here until ~3 hr after the session on trial accounts.
+-- Use the CORTEX_AI_FUNCTIONS_USAGE_HISTORY query below for live AI cost data.
 SELECT
     SERVICE_TYPE,
     ROUND(SUM(CREDITS_USED), 4)                        AS total_credits,
@@ -480,22 +482,19 @@ WHERE START_TIME >= DATEADD(DAY, -30, CURRENT_TIMESTAMP)
 GROUP BY SERVICE_TYPE
 ORDER BY total_credits DESC;
 
--- Daily trend — for the inline chart (AI services only)
+-- Daily AI credit trend — CORTEX_AI_FUNCTIONS_USAGE_HISTORY (≤5 min lag)
+-- Use this for the inline chart on trial accounts: METERING_HISTORY won't
+-- show AI_FUNCTIONS credits until ~3 hr after the session ends.
 SELECT
-    DATE_TRUNC('DAY', START_TIME)   AS usage_day,
-    SERVICE_TYPE,
-    ROUND(SUM(CREDITS_USED), 4)     AS credits_used
-FROM SNOWFLAKE.ACCOUNT_USAGE.METERING_HISTORY
+    DATE_TRUNC('DAY', START_TIME)       AS usage_day,
+    FUNCTION_NAME,
+    MODEL_NAME,
+    ROUND(SUM(CREDITS), 6)              AS credits_used,
+    COUNT(*)                            AS call_count
+FROM SNOWFLAKE.ACCOUNT_USAGE.CORTEX_AI_FUNCTIONS_USAGE_HISTORY
 WHERE START_TIME >= DATEADD(DAY, -7, CURRENT_TIMESTAMP)
-  AND SERVICE_TYPE IN (
-      'AI_FUNCTIONS',
-      'CORTEX_CODE_CLI',
-      'CORTEX_CODE_DESKTOP',
-      'SNOWFLAKE_INTELLIGENCE',
-      'WAREHOUSE_METERING'
-  )
-GROUP BY 1, 2
-ORDER BY 1 ASC, 3 DESC;
+GROUP BY 1, 2, 3
+ORDER BY 1 ASC, 4 DESC;
 
 
 -- ============================================================

@@ -100,8 +100,9 @@ Source data is read-only: GITTREND_DB.PUBLIC.GITHUB_EVENTS
 cortex
 ```
 
-> **No connections found?** Select **Sync from app.snowflake.com** — pulls your
-> connection from your browser session, no manual entry needed.
+> **Connecting:** The easiest method is **Sign in with browser** (or **Sync from
+> app.snowflake.com** if you see that label) — opens a browser popup that
+> authenticates via your existing Snowflake session. No credentials to type.
 
 **Checkpoint:** `Loaded 1 instruction file` appears below the connection panel.
 
@@ -367,15 +368,16 @@ You've built the infrastructure. You've measured it. You've put guardrails on it
 Now ask the tool that built it to help you optimize it.
 
 ```
-Use the Cost Intelligence skill. Why did AI spending occur in my account
-this week? Break it down by service type and show a daily trend as a chart.
-Then give me a specific recommendation to reduce the cost of the GITTREND
-agent we just built — I want to keep it under 2 AI credits per day.
+Use the Cost Intelligence skill. Show me my AI function spending this week.
+Use CORTEX_AI_FUNCTIONS_USAGE_HISTORY for the breakdown — group by function,
+model, and day, then render a daily cost chart. Then give me a specific
+recommendation to reduce the cost of the GITTREND agent we just built —
+I want to keep it under 2 AI credits per day.
 ```
 
 **What CoCo does:**
-1. Queries METERING_HISTORY with a daily breakdown
-2. Renders a bar chart inline — cost by service type, by day
+1. Queries CORTEX_AI_FUNCTIONS_USAGE_HISTORY for the AI credit breakdown by function and model (≤5 min lag — data is available immediately on trial accounts)
+2. Renders a bar chart inline — daily AI cost by function and model
 3. Gives you a specific optimization recommendation for GITTREND
 
 **Common recommendations CoCo gives:**
