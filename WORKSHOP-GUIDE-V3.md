@@ -55,9 +55,9 @@ By the end of this session you will:
 ## What v3 Adds
 
 ```
-SNOWFLAKE.ACCOUNT_USAGE.METERING_HISTORY     →  AI + compute credit usage by service type (≈3 hr lag)
-CORTEX_AI_FUNCTIONS_USAGE_HISTORY            →  per-user / per-model AI function detail (≈2 min lag)
-CORTEX_AGENT_USAGE_HISTORY                   →  per-agent token credit breakdown (≈8 min lag)
+SNOWFLAKE.ACCOUNT_USAGE.METERING_HISTORY     →  AI + compute credit usage by service type (up to 3 hr lag)
+CORTEX_AI_FUNCTIONS_USAGE_HISTORY            →  per-user / per-model AI function detail (≤5 min lag)
+CORTEX_AGENT_USAGE_HISTORY                   →  per-agent token credit breakdown (up to 1 hr lag)
 WORKSHOP_AI_MONITOR (Resource Monitor)       →  Hard ceiling on warehouse compute spend
 Snowflake Budget (AI services)               →  Monthly limit on AI credits (Agents, Functions, CoCo)
 Per User AI Quota                            →  Daily per-user AI spending ceiling
@@ -220,8 +220,8 @@ You built something. Now see what it cost.
 > Snowflake's dynamic model routing is already making efficiency decisions at the
 > infrastructure layer — routing simpler queries to lighter models automatically,
 > claiming 3x token efficiency on comparable workloads. But those decisions are
-> invisible unless you're measuring them. METERING_HISTORY is how you see what's
-> actually being consumed in your account.
+> invisible unless you're measuring them. Four ACCOUNT_USAGE views give you that
+> measurement, at latencies ranging from 5 minutes to 3 hours.
 
 ```
 Show me a breakdown of AI credit usage in my Snowflake account over the last 7 days.
@@ -488,6 +488,9 @@ monitors, and per-user quotas work identically on any agent you build.
 ## Resources
 
 - [METERING_HISTORY view docs](https://docs.snowflake.com/en/sql-reference/account-usage/metering_history)
+- [CORTEX_AI_FUNCTIONS_USAGE_HISTORY view docs](https://docs.snowflake.com/en/sql-reference/account-usage/cortex_ai_functions_usage_history)
+- [CORTEX_AGENT_USAGE_HISTORY view docs](https://docs.snowflake.com/en/sql-reference/account-usage/cortex_agent_usage_history)
+- [SNOWFLAKE_COWORK_USAGE_HISTORY view docs](https://docs.snowflake.com/en/sql-reference/account-usage/snowflake_cowork_usage_history_view)
 - [AI cost management and governance](https://docs.snowflake.com/en/user-guide/snowflake-cortex/governance-and-availability/ai-cost-management-and-governance)
 - [Resource Monitors](https://docs.snowflake.com/en/user-guide/resource-monitors)
 - [Snowflake Budgets](https://docs.snowflake.com/en/user-guide/budgets)

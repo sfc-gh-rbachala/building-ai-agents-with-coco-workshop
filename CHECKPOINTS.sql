@@ -434,7 +434,9 @@ CALL snowflake.local.account_root_budget!GET_SPENDING_LIMIT();
 -- Covers AI Functions, Cortex Agents, CoCo, and CoWork.
 -- NOTE: minimum limit is 1 credit (integer only).
 
--- Step 1: create the quota object
+-- Step 1: create the quota object (stored in GITTREND_DB.PUBLIC)
+USE ROLE ACCOUNTADMIN;
+USE SCHEMA GITTREND_DB.PUBLIC;
 CREATE OR REPLACE SNOWFLAKE.CORE.QUOTA WORKSHOP_AI_QUOTA();
 
 -- Step 2: add the AI domains to monitor
@@ -447,8 +449,8 @@ CALL WORKSHOP_AI_QUOTA!ADD_SHARED_RESOURCE('CORTEX CODE');            -- CoCo
 CALL WORKSHOP_AI_QUOTA!SET_PER_USER_LIMIT(20);          -- monthly
 CALL WORKSHOP_AI_QUOTA!SET_PER_USER_LIMIT(5, 'DAILY');  -- daily
 
--- Step 4: optionally enable block enforcement (first arg: enable, second arg: notify user)
--- CALL WORKSHOP_AI_QUOTA!SET_BLOCK_ENFORCEMENT_ENABLED(TRUE, TRUE);
+-- Step 4: enable block enforcement (first arg: enable, second arg: notify blocked user)
+CALL WORKSHOP_AI_QUOTA!SET_BLOCK_ENFORCEMENT_ENABLED(TRUE, TRUE);
 
 -- Verify config
 CALL WORKSHOP_AI_QUOTA!GET_CONFIG();
