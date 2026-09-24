@@ -1,6 +1,6 @@
-# Your AI agent is live. Now what does it cost? One attendee found out the hard way.
+# Your AI agent is live. Now what does it cost?
 
-## 85 developers. 50 trial accounts. 2 apps shipped. 1 person who burned every credit before the guardrails went in.
+## A field note from the TechEquity v3 workshop on making AI infrastructure visible, governable, and optimizable.
 
 ---
 
@@ -12,9 +12,7 @@ V3 was always going to be the hard question. The one every enterprise team hits 
 
 **What does this actually cost to run?**
 
-Last Wednesday at the TechEquity AI Infrastructure Forum, 85 developers — virtual and in-person — sat down with a live agent (or the CHECKPOINTS.sql to restore one) and we added the governance layer. Step by step. In real time.
-
-One person did not wait for the governance layer.
+Last Thursday, August 20, at the TechEquity AI Infrastructure Forum, participants sat down with a live agent — or the `CHECKPOINTS.sql` path to restore one — and we added the governance layer. Step by step. In real time.
 
 ---
 
@@ -26,29 +24,9 @@ The short version: your agent now automatically routes simpler tasks to lighter,
 
 Sridhar Ramaswamy put it simply: *"Usage is an input. The question that matters is what a company gets in return."*
 
-We opened the session with that quote. Then we asked: who here knows what their agent cost to run last week?
+We opened the session with that quote and asked a practical follow-up: could participants explain what their agent had cost to run? Without the right usage views, that answer is harder than it sounds.
 
-Nobody raised their hand.
-
-That's the gap Steps 4 through 6 close.
-
----
-
-## 50 trial accounts. 2 apps. 1 memorable lesson.
-
-Before we built anything, a few numbers from the session:
-
-- **85 participants** — virtual and in-person, the largest v3 audience yet
-- **50 trial accounts activated** — people who had the agent running within the session window
-- **2 community apps deployed** — attendees who shipped something beyond the workshop and posted it
-
-And then there was the one account that lit up in ACCOUNT_USAGE before we got to Step 5.
-
-Someone got curious. They ran the GitTrend agent — the one we built in V1 and V2 — heavily. Asked it a lot of questions. Hit the AI_COMPLETE call repeatedly against the 107M event dataset. By the time we got to "Step 4: Cost Visibility," their CORTEX_AI_FUNCTIONS_USAGE_HISTORY was... lively.
-
-They had burned through their trial credit allocation before we could teach them to stop it.
-
-This was the best possible advertisement for why we built Step 5.
+V3 closes that gap in three moves: make usage visible, put controls around both credit currencies, and use the same tool that built the agent to find practical ways to operate it more efficiently.
 
 ---
 
@@ -71,9 +49,9 @@ SNOWFLAKE_COWORK_USAGE_HISTORY     — up to 1 hr lag. CoWork sessions.
 METERING_HISTORY                   — up to 3 hr lag. High-level summary.
 ```
 
-One CoCo prompt runs all four. On a brand-new trial account, CORTEX_AI_FUNCTIONS_USAGE_HISTORY is the one with data immediately — your AI_COMPLETE calls from Steps 0-3 are already there within minutes, showing your username, the model (claude-sonnet-4-6 or snowflake-arctic-embed), the call count, and the exact credit cost.
+One CoCo prompt runs all four. On a brand-new trial account, CORTEX_AI_FUNCTIONS_USAGE_HISTORY is the one with data first — your AI_COMPLETE calls from Steps 0–3 are already there within minutes, showing your username, the function, the model, and the credit cost.
 
-That's when the room got quiet. Real numbers. Real usage. Real credit costs. Attached to real names.
+The important moment is seeing real usage rather than a sample dashboard: a function call, its model, and its credit cost attached to the work you just performed.
 
 **Step 5 — Cost Controls**
 
@@ -82,18 +60,18 @@ Two billing systems in one Snowflake account. Platform Credits (compute) and AI 
 Three guardrails, one CoCo session:
 
 1. **Resource Monitor** on WORKSHOP_WH — compute ceiling, suspend at 100%
-2. **Account Budget** (`account_root_budget`) — monthly limit on everything: warehouse, AI, Cortex Search. Two calls. No tag setup.
-3. **Per User AI Quota** — `CREATE SNOWFLAKE.CORE.QUOTA`. Covers AI Functions, Cortex Agents, CoCo, CoWork. Daily and monthly limits. Block enforcement on. When you hit it, new AI requests are denied within minutes.
+2. **Account Budget** (`snowflake.local.account_root_budget`) — monthly limit on account-wide credit usage, including warehouse compute, AI services, and Cortex Search. No tag setup is required for the account budget.
+3. **Per User AI Quota** — configured from Snowsight for AI-related features. It adds daily and monthly per-user limits with block enforcement.
 
-The person who burned their credits? Their trial account was the live demo for what happens without Step 5.
+The sequence matters: measure the workload first, then apply account-wide and per-user controls to the spend you can now see.
 
 **Step 6 — Ask CoCo About the Cost**
 
-This one surprised people. You built the agent. You measured it. You put guardrails on it. Then you ask the same tool that built it to optimize it.
+This is the close-the-loop step. You built the agent. You measured it. You put guardrails on it. Then you ask the same tool that built it to optimize it.
 
 The Cost Intelligence skill in CoCo queries CORTEX_AI_FUNCTIONS_USAGE_HISTORY, renders a daily cost chart inline, and gives you specific recommendations: reduce `max_results` on GITHUB_REPO_SEARCH, add a concise instruction to the system prompt, switch from `auto` to a specific model for simple queries.
 
-All real levers. All implementable in 10 minutes without changing what the agent does.
+These are practical levers you can apply without changing the agent's purpose.
 
 Dynamic model routing is Snowflake doing this at the infrastructure layer automatically. Cost Intelligence is you doing it at the application layer deliberately. Both matter.
 
@@ -101,15 +79,11 @@ Dynamic model routing is Snowflake doing this at the infrastructure layer automa
 
 ## What it actually costs
 
-Here's the number nobody expected.
+A workshop like this does not produce one universal cost number. Your result depends on warehouse size, query volume, search refreshes, selected models, and whether you are measuring a fresh account or an established workload.
 
-The entire v3 build — restore from V2, Step 4 (four-view cost breakdown), Step 5 (three guardrails), Step 6 (optimization loop), a CoCo session — runs under 0.01 AI credits for the workshop itself.
+What v3 gives you is a way to answer the question with your own data. `CORTEX_AI_FUNCTIONS_USAGE_HISTORY` exposes AI function usage with short latency. `METERING_HISTORY` provides account-level context. Resource Monitors, Budgets, and Per User Quotas let you act on what you find.
 
-The S3 data load (107M events) hits WORKSHOP_WH for about 1.2 compute credits. The Cortex Search index refresh costs a small fraction of an AI credit. The AI_COMPLETE calls in the agent are measurable in thousandths of a credit per query.
-
-The infrastructure to govern all of that? Free to create.
-
-The question isn't whether you can afford to run a governed AI agent. It's whether you can afford to run one you can't see.
+The key is not a benchmark; it is visibility. You cannot optimize what you cannot measure, and you cannot govern what you cannot see.
 
 ---
 
@@ -119,7 +93,7 @@ Step 4, first result. CORTEX_AI_FUNCTIONS_USAGE_HISTORY came back with rows.
 
 Not sample data. Your username. Your function calls. Your model. Your credits. Attached to the thing you built in the last 30 minutes.
 
-For some people that was a small number. For at least one person it was not small at all. Both reactions proved the same point: visibility is the prerequisite for everything else. You can't optimize what you can't measure. You can't govern what you can't see.
+Seeing those rows turns an abstract bill into an operational fact. That is the point: visibility is the prerequisite for everything else. You cannot optimize what you cannot measure. You cannot govern what you cannot see.
 
 FinOps for AI is just FinOps. Same discipline, new services to track.
 
@@ -127,11 +101,11 @@ FinOps for AI is just FinOps. Same discipline, new services to track.
 
 ## Build it yourself
 
-Everything is open source:
+The workshop materials are available in the public repository:
 
 **Workshop repo:** https://github.com/sfc-gh-rbachala/building-ai-agents-with-coco-workshop
 
-`WORKSHOP-GUIDE-V3.md` walks through Steps 4-6. `CHECKPOINTS.sql` has fallback SQL for every step — CP7 through CP9 are fully doc-verified. The `media/` folder has demo videos.
+`WORKSHOP-GUIDE-V3.md` walks through Steps 4–6. `CHECKPOINTS.sql` has fallback SQL for the v3 flow, including CP7, CP8, CP8b, and CP9. The `media/` folder has demo videos.
 
 **Free trial:** https://signup.snowflake.com/
 
@@ -143,7 +117,7 @@ The same governance pattern works on any Snowflake-based agent: your support tic
 
 ## What's next: V4
 
-The question the room kept asking after Step 6: *can the agent govern itself?*
+A natural next question after Step 6 is: *can the agent govern itself?*
 
 Not just CoCo making recommendations — but the agent embedding cost awareness into its own behavior. System prompts with budget constraints. Dynamic max_results based on query complexity. Agents that know they're operating inside a quota and route their own tool calls accordingly.
 
@@ -159,4 +133,4 @@ https://github.com/sfc-gh-rbachala/building-ai-agents-with-coco-workshop
 
 ---
 
-**Tags:** Snowflake · AI Agent · FinOps · Cost Management · CoCo · Cortex · MCP · Model Context Protocol
+*#Snowflake #AIAgent #FinOps #CostManagement #CoCo #Cortex #MCP #ModelContextProtocol*
