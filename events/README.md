@@ -8,7 +8,8 @@ level. See [`../VERSION.md`](../VERSION.md) for the full comparison.
 
 | Event | Date | Level | Guide | Format | Status |
 |---|---|---|---|---|---|
-| [TechEquity AI Infrastructure Forum](techequity-2026-08-20.md) | 2026-08-20 | v3 | [WORKSHOP-GUIDE-V3.md](../WORKSHOP-GUIDE-V3.md) | Cost Intelligence + MCP | **Upcoming** |
+| [TechEquity AI Forum — Multi-Agent](svai-2026-09-29.md) | 2026-09-29 | v4 | [WORKSHOP-GUIDE-V4.md](../WORKSHOP-GUIDE-V4.md) | Stage talk + live demo | **Tonight** |
+| [TechEquity AI Infrastructure Forum](techequity-2026-08-20.md) | 2026-08-20 | v3 | [WORKSHOP-GUIDE-V3.md](../WORKSHOP-GUIDE-V3.md) | Cost Intelligence + MCP | Past |
 | [ODSC AI × Snowflake, San Francisco](odsc-2026-08-06.md) | 2026-08-06 | v1 | [WORKSHOP-GUIDE.md](../WORKSHOP-GUIDE.md) | 5 steps, MCP take-home | Past |
 | [TechEquity AI Forum, Level 2](techequity-2026-07-28.md) | 2026-07-28 | v2 | [WORKSHOP-GUIDE-V2.md](../WORKSHOP-GUIDE-V2.md) | 4 blocks, MCP live | Past |
 

@@ -6,15 +6,15 @@ Three levels, one dataset, one repo. Each level builds on the previous.
 
 ## Level Comparison
 
-| | v1 | v2 | v3 |
-|---|---|---|---|
-| **Guide** | [`WORKSHOP-GUIDE.md`](WORKSHOP-GUIDE.md) | [`WORKSHOP-GUIDE-V2.md`](WORKSHOP-GUIDE-V2.md) | [`WORKSHOP-GUIDE-V3.md`](WORKSHOP-GUIDE-V3.md) |
-| **Duration** | 60 min | 75 min | ~75 min |
-| **MCP Server** | Take-home stretch | Live core step | Carried forward from v2 |
-| **New this level** | GitTrend agent | MCP endpoint + external client | Cost visibility + controls |
-| **Step structure** | 5 named steps | Step 0 / 1 / 2 (×5 sub-prompts) / 3 | v2 + Steps 4-6 |
-| **Best for** | Mixed audiences, large rooms, 60 min slots | Technical audiences, 75 min slots | Infrastructure-focused audiences |
-| **Checkpoints** | `CHECKPOINTS.sql` CP1–5 | `CHECKPOINTS.sql` CP1–6 | `CHECKPOINTS.sql` CP1–6 + CP7–9 |
+| | v1 | v2 | v3 | v4 |
+|---|---|---|---|---|
+| **Guide** | [`WORKSHOP-GUIDE.md`](WORKSHOP-GUIDE.md) | [`WORKSHOP-GUIDE-V2.md`](WORKSHOP-GUIDE-V2.md) | [`WORKSHOP-GUIDE-V3.md`](WORKSHOP-GUIDE-V3.md) | [`WORKSHOP-GUIDE-V4.md`](WORKSHOP-GUIDE-V4.md) |
+| **Duration** | 60 min | 75 min | ~75 min | 45-60 min |
+| **Format** | Hands-on | Hands-on | Hands-on | Stage talk + live demo |
+| **New this level** | GitTrend agent | MCP endpoint + external client | Cost visibility + controls | Multi-agent orchestration patterns |
+| **Step structure** | 5 named steps | Step 0 / 1 / 2 (×5 sub-prompts) / 3 | v2 + Steps 4-6 | 4 acts + live demo |
+| **Best for** | Mixed audiences, large rooms, 60 min slots | Technical audiences, 75 min slots | Infrastructure-focused audiences | Large audiences, multi-agent intro |
+| **Checkpoints** | `CHECKPOINTS.sql` CP1–5 | `CHECKPOINTS.sql` CP1–6 | `CHECKPOINTS.sql` CP1–6 + CP7–9 | Demo account pre-built |
 
 ---
 
@@ -95,3 +95,4 @@ for every step across v1 and v2:
 | v1 | Jun 30, 2026 | Snowflake SVAI Hub, Menlo Park | ~130 | Snowsight-first; no MCP |
 | v2 | Jul 28, 2026 | Snowflake SVAI Hub, Menlo Park | — | CLI-first; MCP live |
 | v3 | Aug 20, 2026 | Snowflake SVAI Hub, Menlo Park | — | Cost visibility, resource monitors, per-user quotas |
+| v4 | Sep 29, 2026 | Snowflake SVAI Hub, Menlo Park | 849+ | Multi-agent orchestration; stage talk + live demo |

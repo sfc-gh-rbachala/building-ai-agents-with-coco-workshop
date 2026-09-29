@@ -2,19 +2,20 @@
 
 Workshop materials for building a **production AI agent on 107 million real GitHub events** — with zero SQL written by hand.
 
-Presented by [Richie Bachala](https://www.snowflake.com/en/blog/authors/richie-bachala/), Solutions Architecture Leader at Snowflake.
+Presented by [Richie Bachala](https://www.snowflake.com/en/blog/authors/richie-bachala/), Sr. Manager of Applied Engineering at Snowflake.
 
 ---
 
 ## Workshop Levels
 
-Three levels, one dataset. Each level builds on the previous.
+Four levels, one dataset. Each level builds on the previous.
 
-| Level | Guide | Duration | MCP | Best for |
+| Level | Guide | Duration | Format | Best for |
 |---|---|---|---|---|
-| v1 | [`WORKSHOP-GUIDE.md`](WORKSHOP-GUIDE.md) | 60 min | Take-home | Mixed audiences, large rooms |
-| v2 | [`WORKSHOP-GUIDE-V2.md`](WORKSHOP-GUIDE-V2.md) | 75 min | Live | Technical audiences, smaller rooms |
-| v3 | [`WORKSHOP-GUIDE-V3.md`](WORKSHOP-GUIDE-V3.md) | ~75 min | Carried from v2 | Infrastructure / cost focus |
+| v1 | [`WORKSHOP-GUIDE.md`](WORKSHOP-GUIDE.md) | 60 min | Hands-on, MCP take-home | Mixed audiences, large rooms |
+| v2 | [`WORKSHOP-GUIDE-V2.md`](WORKSHOP-GUIDE-V2.md) | 75 min | Hands-on, MCP live | Technical audiences, smaller rooms |
+| v3 | [`WORKSHOP-GUIDE-V3.md`](WORKSHOP-GUIDE-V3.md) | ~75 min | Hands-on, cost theme | Infrastructure / cost focus |
+| v4 | [`WORKSHOP-GUIDE-V4.md`](WORKSHOP-GUIDE-V4.md) | 45-60 min | Stage talk + live demo | Multi-agent orchestration, large audiences |
 
 See [`VERSION.md`](VERSION.md) for the full level comparison and checkpoint map.
 
@@ -24,7 +25,7 @@ See [`VERSION.md`](VERSION.md) for the full level comparison and checkpoint map.
 
 Pre-work, trial signup links, and timing for each event are in the [`events/`](events/) folder.
 
-Working through this on your own? Grab a [free Snowflake trial](https://signup.snowflake.com/) and follow the guide. You may need to enable cross-region inference: `ALTER ACCOUNT SET CORTEX_ENABLED_CROSS_REGION = 'ANY_REGION';`
+Working through this on your own? Grab a [free Snowflake trial](https://signup.snowflake.com/?t=85d73346e8ea876fc9ef0b1f2d23645bef5ba9627f941730e489ee1427b587bb&cloud=aws&region=us-east-2) and follow the guide. You may need to enable cross-region inference: `ALTER ACCOUNT SET CORTEX_ENABLED_CROSS_REGION = 'ANY_REGION';`
 
 ---
 
@@ -122,11 +123,11 @@ GITTREND_MCP                      →  MCP Server — exposes GitTrend anywhere
 |---|---|
 | [`WORKSHOP-GUIDE.md`](WORKSHOP-GUIDE.md) | v1 build guide — 5 steps, MCP take-home |
 | [`WORKSHOP-GUIDE-V2.md`](WORKSHOP-GUIDE-V2.md) | v2 build guide — Steps 0–3 (4 blocks), MCP live |
-| [`WORKSHOP-GUIDE-V3.md`](WORKSHOP-GUIDE-V3.md) | v3 guide — cost intelligence (under development) |
+| [`WORKSHOP-GUIDE-V3.md`](WORKSHOP-GUIDE-V3.md) | v3 guide — cost intelligence |
+| [`WORKSHOP-GUIDE-V4.md`](WORKSHOP-GUIDE-V4.md) | v4 guide — multi-agent orchestration (stage talk) |
 | [`VERSION.md`](VERSION.md) | Level comparison, checkpoint map, delivery lineage |
 | [`CHECKPOINTS.sql`](CHECKPOINTS.sql) | Fallback SQL for every step — use if CoCo gets stuck |
 | [`events/`](events/) | Per-event details: date, venue, signup link, timing, level |
-| [`sample_weekly_digest_skill.md`](sample_weekly_digest_skill.md) | Example Agent Skill to extend GitTrend |
 | [`media/`](media/) | Deck PDF and demo recordings |
 
 ---
@@ -143,5 +144,5 @@ GITTREND_MCP                      →  MCP Server — exposes GitTrend anywhere
 
 ## About the Presenter
 
-**Richie Bachala** — Solutions Architecture Leader, Snowflake
+**Richie Bachala** — Sr. Manager of Applied Engineering, Snowflake
 [Blog](https://www.snowflake.com/en/blog/authors/richie-bachala/) · [LinkedIn](https://www.linkedin.com/in/richiebachala/)
