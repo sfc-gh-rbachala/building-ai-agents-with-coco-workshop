@@ -25,7 +25,7 @@ See [`VERSION.md`](VERSION.md) for the full level comparison and checkpoint map.
 
 Pre-work, trial signup links, and timing for each event are in the [`events/`](events/) folder.
 
-Working through this on your own? Grab a [free Snowflake trial](https://signup.snowflake.com/?t=85d73346e8ea876fc9ef0b1f2d23645bef5ba9627f941730e489ee1427b587bb&cloud=aws&region=us-east-2) and follow the guide. You may need to enable cross-region inference: `ALTER ACCOUNT SET CORTEX_ENABLED_CROSS_REGION = 'ANY_REGION';`
+Working through this on your own? Grab a [free Snowflake trial](https://signup.snowflake.com/?t=92fac19b0d89ff264c82a6c1090b4d2745c8f38d238a418988cb0b765fb8043c&cloud=aws&region=us-east-2) and follow the guide. You may need to enable cross-region inference: `ALTER ACCOUNT SET CORTEX_ENABLED_CROSS_REGION = 'ANY_REGION';`
 
 ---
 
